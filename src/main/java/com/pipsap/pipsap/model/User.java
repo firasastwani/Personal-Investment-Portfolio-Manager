@@ -20,6 +20,8 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public User() {}
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
