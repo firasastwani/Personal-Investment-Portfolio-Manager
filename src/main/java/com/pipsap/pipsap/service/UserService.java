@@ -69,8 +69,6 @@ public class UserService {
     }
 
     public boolean registerUser(String username, String password) {
-
-
         final String sql = "Insert into users (username, password) values (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
