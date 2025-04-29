@@ -4,7 +4,7 @@ CREATE DATABASE IF NOT EXISTS pipsap_db;
 USE pipsap_db;
 
 -- Users Table
-CREATE TABLE users (
+CREATE TABLE if not existsusers (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE users (
 );
 
 -- Portfolios Table
-CREATE TABLE portfolios (
+CREATE TABLE if not exists portfolios (
     portfolio_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE portfolios (
 );
 
 -- Transactions Table
-CREATE TABLE transactions (
+CREATE TABLE if not exists transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     portfolio_id INT NOT NULL,
     symbol VARCHAR(10) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE transactions (
 );
 
 -- Watchlist Table
-CREATE TABLE watchlist (
+CREATE TABLE if not exists watchlist (
     watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     symbol VARCHAR(10) NOT NULL,

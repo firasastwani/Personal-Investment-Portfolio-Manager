@@ -22,5 +22,6 @@
 /Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/model/User.java
 /Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/model/Portfolio.java
 /Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/controller/TransactionController.java
+/Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/model/TransactionType.java
 /Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/util/DatabaseConnectionTest.java
 /Users/firasastwani/Desktop/DBMS-Personal-Investment-Portfolio-Manager/src/main/java/com/pipsap/pipsap/service/WatchlistService.java

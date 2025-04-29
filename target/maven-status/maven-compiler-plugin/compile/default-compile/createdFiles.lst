@@ -9,6 +9,7 @@ com/pipsap/pipsap/repository/SecurityRepository.class
 com/pipsap/pipsap/service/UserService.class
 com/pipsap/pipsap/service/PortfolioService.class
 com/pipsap/pipsap/controller/PortfolioController.class
+com/pipsap/pipsap/model/TransactionType.class
 com/pipsap/pipsap/repository/UserRepository.class
 com/pipsap/pipsap/model/Security.class
 com/pipsap/pipsap/security/JWTAuthenticationFilter.class

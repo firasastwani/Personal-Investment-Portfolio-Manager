@@ -5,7 +5,7 @@ import com.pipsap.pipsap.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
+public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
     List<Portfolio> findByUser(User user);
-    List<Portfolio> findByUserId(Long userId);
+    List<Portfolio> findByUser_UserId(Integer userId);
 } 

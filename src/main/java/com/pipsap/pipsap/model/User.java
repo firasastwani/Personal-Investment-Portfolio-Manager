@@ -1,37 +1,37 @@
 package com.pipsap.pipsap.model;
 
 import jakarta.persistence.*;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "user_id")
+    private Integer userId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Portfolio> portfolios;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<WatchlistItem> watchlistItems;
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    // Getters and Setters
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -50,27 +50,11 @@ public class User {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Set<Portfolio> getPortfolios() {
-        return portfolios;
-    }
-
-    public void setPortfolios(Set<Portfolio> portfolios) {
-        this.portfolios = portfolios;
-    }
-
-    public Set<WatchlistItem> getWatchlistItems() {
-        return watchlistItems;
-    }
-
-    public void setWatchlistItems(Set<WatchlistItem> watchlistItems) {
-        this.watchlistItems = watchlistItems;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 } 

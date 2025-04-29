@@ -18,7 +18,7 @@ public class PortfolioService {
         return portfolioRepository.save(portfolio);
     }
 
-    public Optional<Portfolio> getPortfolioById(Long id) {
+    public Optional<Portfolio> getPortfolioById(Integer id) {
         return portfolioRepository.findById(id);
     }
 
@@ -26,15 +26,15 @@ public class PortfolioService {
         return portfolioRepository.findByUser(user);
     }
 
-    public List<Portfolio> getPortfoliosByUserId(Long userId) {
-        return portfolioRepository.findByUserId(userId);
+    public List<Portfolio> getPortfoliosByUserId(Integer userId) {
+        return portfolioRepository.findByUser_UserId(userId);
     }
 
     public Portfolio updatePortfolio(Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
     }
 
-    public void deletePortfolio(Long id) {
+    public void deletePortfolio(Integer id) {
         portfolioRepository.deleteById(id);
     }
 } 
