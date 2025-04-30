@@ -36,7 +36,6 @@ public class UserService {
     }
 
     public boolean authenticate(String username, String password) {
-
         final String sql = "Select * from users where username = ?"; 
 
         try (Connection conn = dataSource.getConnection();
@@ -46,7 +45,13 @@ public class UserService {
             
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
-                return passwordEncoder.matches(password, storedPassword);
+                if (passwordEncoder.matches(password, storedPassword)) {
+                    loggedInUser = new User();
+                    loggedInUser.setUserId(rs.getInt("user_id"));
+                    loggedInUser.setUsername(rs.getString("username"));
+                    loggedInUser.setPassword(rs.getString("password"));
+                    return true;
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error authenticating user", e);
@@ -61,6 +66,7 @@ public class UserService {
     }
 
     public boolean isAuthenticated() {
+        System.out.println("loggedInUser: " + loggedInUser);
         return loggedInUser != null;
     }
 
