@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/api/auth/login", { email, password });
+      await axios.post("http://localhost:8080/api/auth/login", { username, password });
       router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
@@ -35,14 +35,14 @@ export default function LoginPage() {
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Portfolio Login</h2>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1" htmlFor="email">
-            Email
+          <label className="block text-sm font-medium mb-1" htmlFor="username">
+            Username
           </label>
           <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             className="w-full px-3 py-2 border rounded"
           />
@@ -68,7 +68,7 @@ export default function LoginPage() {
         </button>
 
         <a href="/register" className="block text-blue-600 hover:underline text-center pt-2">
-            Register here
+          Register here
         </a>
       </form>
     </div>

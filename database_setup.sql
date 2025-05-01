@@ -4,7 +4,7 @@ CREATE DATABASE IF NOT EXISTS pipsap_db;
 USE pipsap_db;
 
 -- Users Table
-CREATE TABLE if not existsusers (
+CREATE TABLE if not exists users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
