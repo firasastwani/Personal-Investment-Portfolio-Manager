@@ -61,6 +61,8 @@ public class UserService {
     }
 
     public void unAuthenticate() {
+        
+        System.out.println("Unauthenticating user");
 
         loggedInUser = null;
     }
