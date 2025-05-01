@@ -1,16 +1,24 @@
 package com.pipsap.pipsap.controller;
 
+import com.pipsap.pipsap.model.Portfolio;
+import com.pipsap.pipsap.service.PortfolioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolios")
 public class PortfolioController {
 
+    @Autowired
+    private PortfolioService portfolioService;
+
     @GetMapping
-    public ResponseEntity<?> getAllPortfolios() {
-        // TODO: Implement get all portfolios logic
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<Portfolio>> getAllPortfolios() {
+        List<Portfolio> portfolios = portfolioService.getAllPortfolios();
+        return ResponseEntity.ok(portfolios);
     }
 
     @GetMapping("/{id}")

@@ -37,4 +37,8 @@ public class PortfolioService {
     public void deletePortfolio(Integer id) {
         portfolioRepository.deleteById(id);
     }
+
+    public List<Portfolio> getAllPortfolios() {
+        return portfolioRepository.findAll();
+    }
 } 
