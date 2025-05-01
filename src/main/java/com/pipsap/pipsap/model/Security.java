@@ -1,6 +1,7 @@
 package com.pipsap.pipsap.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,9 @@ public class Security {
 
     @Column
     private String exchange;
+
+    @Column(name = "static_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal staticPrice;
 
     @OneToMany(mappedBy = "security", cascade = CascadeType.ALL)
     private Set<Transaction> transactions;
@@ -67,6 +71,14 @@ public class Security {
 
     public void setExchange(String exchange) {
         this.exchange = exchange;
+    }
+
+    public BigDecimal getStaticPrice() {
+        return staticPrice;
+    }
+
+    public void setStaticPrice(BigDecimal staticPrice) {
+        this.staticPrice = staticPrice;
     }
 
     public Set<Transaction> getTransactions() {
