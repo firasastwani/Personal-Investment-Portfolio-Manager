@@ -32,7 +32,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         
         // For all other endpoints, check authentication
         if (!userService.isAuthenticated()) {
-            response.sendRedirect("/login");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
         
