@@ -13,6 +13,10 @@ public class SecurityService {
     @Autowired
     private SecurityRepository securityRepository;
 
+    public List<Security> getAllSecurities() {
+        return securityRepository.findAll();
+    }
+
     public Security createSecurity(Security security) {
         return securityRepository.save(security);
     }

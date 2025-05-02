@@ -22,18 +22,22 @@ public class WatchlistService {
     }
 
     public List<WatchlistItem> getWatchlistByUserId(Integer userId) {
+        
         return watchlistRepository.findByUser_UserId(userId);
     }
 
     public List<WatchlistItem> getWatchlistBySecurity(Security security) {
+
         return watchlistRepository.findBySecurity(security);
     }
 
     public WatchlistItem addToWatchlist(WatchlistItem watchlistItem) {
+
         return watchlistRepository.save(watchlistItem);
     }
 
     public void removeFromWatchlist(Integer watchlistId) {
+
         watchlistRepository.deleteById(watchlistId);
     }
 } 
