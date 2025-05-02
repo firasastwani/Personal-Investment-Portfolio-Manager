@@ -11,6 +11,17 @@ CREATE TABLE if not exists users (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Securities Table (moved up to be referenced by other tables)
+CREATE TABLE IF NOT EXISTS securities (
+    security_id INT AUTO_INCREMENT PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL UNIQUE,
+    name VARCHAR(100),
+    exchange VARCHAR(50),
+    sector VARCHAR(100),
+    static_price DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'USD'
+);
+
 -- Portfolios Table
 CREATE TABLE if not exists portfolios (
     portfolio_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,31 +49,23 @@ CREATE TABLE if not exists portfolio_holdings (
 CREATE TABLE if not exists transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     portfolio_id INT NOT NULL,
-    symbol VARCHAR(10) NOT NULL,
+    security_id INT NOT NULL,
     transaction_type ENUM('BUY', 'SELL') NOT NULL,
     quantity DECIMAL(10, 2) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     transaction_date DATETIME NOT NULL,
     notes TEXT,
-    FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE,
+    FOREIGN KEY (security_id) REFERENCES securities(security_id) ON DELETE CASCADE
 );
 
 -- Watchlist Table
 CREATE TABLE if not exists watchlist (
     watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    symbol VARCHAR(10) NOT NULL,
+    security_id INT NOT NULL,
     added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
--- Securities Table
-CREATE TABLE IF NOT EXISTS securities (
-    security_id INT AUTO_INCREMENT PRIMARY KEY,
-    symbol VARCHAR(10) NOT NULL UNIQUE,
-    name VARCHAR(100),
-    exchange VARCHAR(50),
-    sector VARCHAR(100),
-    static_price DECIMAL(10, 2) NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD'
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (security_id) REFERENCES securities(security_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_security (user_id, security_id)
 );
