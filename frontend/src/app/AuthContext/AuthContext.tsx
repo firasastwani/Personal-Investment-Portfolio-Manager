@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 
 type User = {
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
     
     useEffect(() => {
         const fetchUser = async () => {
@@ -27,7 +29,7 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
             if (response.data.authenticated) {
                 setUser(response.data.user);
             } else {
-                setUser(null);
+                router.push("/login"); // Redirect to login if not authenticated
             }
         } catch (error) {
             console.error("Error fetching user:", error);
