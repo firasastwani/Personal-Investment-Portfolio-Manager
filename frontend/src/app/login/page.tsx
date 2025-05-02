@@ -9,13 +9,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const registrationSuccess = searchParams.get("registration");
+
 
   useEffect(() => {
+    const registrationSuccess = searchParams.get("registration");
     if (registrationSuccess === "success") {
       alert("Registration successful");
     }
-  }, [registrationSuccess]);
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +24,9 @@ export default function LoginPage() {
       await axios.post("http://localhost:8080/api/auth/login", { username, password });
       router.push("/dashboard");
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || "Login failed.");
+      }
       console.error("Login failed:", error);
     }
   };
