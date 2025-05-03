@@ -11,20 +11,29 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/securities")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class SecurityController {
 
-    @Autowired
+    @Autowired  
     private SecurityService securityService;
 
     @GetMapping
     public ResponseEntity<List<Security>> getAllSecurities() {
-        List<Security> securities = securityService.getAllSecurities(); // return all if empty
-        return ResponseEntity.ok(securities);
+        try {
+            System.out.println("Attempting to get all securities");
+            List<Security> securities = securityService.getAllSecurities();
+            System.out.println("Successfully retrieved " + securities.size() + " securities");
+            return ResponseEntity.ok(securities);
+        } catch (Exception e) {
+            System.err.println("Error in getAllSecurities: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/getSecurityById")
     public ResponseEntity<Security> getSecurityById(@PathVariable Long id) {
+
         Optional<Security> security = securityService.getSecurityById(id);
         return security.map(ResponseEntity::ok)
                        .orElse(ResponseEntity.notFound().build());
@@ -32,12 +41,14 @@ public class SecurityController {
 
     @PostMapping
     public ResponseEntity<Security> createSecurity(@RequestBody Security security) {
+
         Security createdSecurity = securityService.createSecurity(security);
         return ResponseEntity.ok(createdSecurity);
     }
 
     @PutMapping("/updateSecurity")
     public ResponseEntity<Security> updateSecurity(@RequestBody Security security) {
+
         Optional<Security> existingSecurity = securityService.getSecurityById(security.getId());
         if (existingSecurity.isPresent()) {
             Security updated = existingSecurity.get();
