@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
   const router = useRouter();
+  
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

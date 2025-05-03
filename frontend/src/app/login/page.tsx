@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import { useAuth } from "../AuthContext/AuthContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
 
 
   useEffect(() => {
@@ -21,7 +23,9 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/api/auth/login", { username, password });
+      const login = await axios.post("http://localhost:8080/api/auth/login", { username, password }, { withCredentials: true });
+      console.log("Login response:", login.data);
+      await refreshUser();
       router.push("/dashboard");
     } catch (error) {
       if (axios.isAxiosError(error)) {

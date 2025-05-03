@@ -13,6 +13,7 @@ type AuthContextType = {
     user: User | null;
     loading: boolean;
     isAuthenticated: boolean;
+    refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -21,14 +22,27 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+
+    const publicRoutes = ["/login", "/register"];
     
     useEffect(() => {
+
+        const path = window.location.pathname;
+
+        if (publicRoutes.includes(path)) {
+            setLoading(false);
+            return;
+        }
+
         const fetchUser = async () => {
         try {
             const response = await axios.get("http://localhost:8080/api/auth/check", { withCredentials: true });
             if (response.data.authenticated) {
+                console.log("User authenticated:", response.data.user);
                 setUser(response.data.user);
             } else {
+                console.log("User not authenticated");
+                console.log("Response data:", response.data);
                 router.push("/login"); // Redirect to login if not authenticated
             }
         } catch (error) {
@@ -41,9 +55,23 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
     
         fetchUser();
     }, []);
+
+    const refreshUser = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/auth/check", { withCredentials: true });
+            if (response.data.authenticated) {
+                setUser(response.data.user);
+            } else {
+                setUser(null);
+            }
+        } catch (error) {
+            console.error("Error refreshing user:", error);
+            setUser(null);
+        }
+    };
     
     return (
-        <AuthContext.Provider value={{ user, loading , isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, loading , isAuthenticated: !!user, refreshUser }}>
         {children}
         </AuthContext.Provider>
     );
