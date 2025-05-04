@@ -45,7 +45,6 @@ public class SecurityService {
                         security.setStaticPrice(rs.getBigDecimal("static_price"));
                         security.setCurrency(rs.getString("currency"));
                         securities.add(security);
-                        System.out.println("SecurityService: Added security: " + security.getSymbol());
                     }
                 }
             }

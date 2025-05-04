@@ -18,24 +18,25 @@
         const [stocks, setStocks] = useState<Stock[]>([]);
         const [fetching, setFetching] = useState(true);
 
-        useEffect(() => {
-            const fetchStocks = async () => {
-                try {
-                    const response = await fetch("http://localhost:8080/api/securities", {
-                        method: "GET",
-                        credentials: "include",
-                    });
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    const data = await response.json();
-                    setStocks(data);
-                } catch (error) {
-                    console.error("Error fetching stocks:", error);
-                } finally {
-                    setFetching(false);
+        const fetchStocks = async () => {
+            try {
+                const response = await fetch("http://localhost:8080/api/securities", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
                 }
-            };
+                const data = await response.json();
+                setStocks(data);
+            } catch (error) {
+                console.error("Error fetching stocks:", error);
+            } finally {
+                setFetching(false);
+            }
+        };
+
+        useEffect(() => {
             if (user) {
                 fetchStocks();
             }
