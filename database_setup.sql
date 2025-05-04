@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS securities (
     currency VARCHAR(10) DEFAULT 'USD'
 );
 
+-- Run this after creating database to boost securities performance
+CREATE INDEX idx_symbol ON securities(symbol);
+CREATE INDEX idx_name ON securities(name);
+
+
 -- Portfolios Table
 CREATE TABLE if not exists portfolios (
     portfolio_id INT AUTO_INCREMENT PRIMARY KEY,

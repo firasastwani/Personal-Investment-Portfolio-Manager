@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS securities (
     currency VARCHAR(10) DEFAULT 'USD'
 );
 
+-- Run this after creating database to boost securities performance
+CREATE INDEX idx_symbol ON securities(symbol);
+CREATE INDEX idx_name ON securities(name);
+
+
+
 INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
 VALUES (
     'AAPL',
