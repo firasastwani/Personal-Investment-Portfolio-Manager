@@ -61,6 +61,12 @@ public class SecurityService {
         }
     }
 
+    public java.math.BigDecimal getPriceBySymbol(String symbol) {
+        Security security = getSecurityBySymbol(symbol)
+            .orElseThrow(() -> new RuntimeException("Security not found"));
+        return security.getStaticPrice();
+    }
+
     public Security createSecurity(Security security) {
         return securityRepository.save(security);
     }

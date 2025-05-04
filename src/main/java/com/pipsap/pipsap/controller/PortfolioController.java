@@ -25,6 +25,8 @@ public class PortfolioController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getPortfolio(@PathVariable Integer id) {
 
+        System.out.println("PortfolioController: Getting portfolio with id: " + id);
+
         Optional<Portfolio> portfolio = portfolioService.getPortfolioById(id);
 
         if (portfolio.isEmpty()) {

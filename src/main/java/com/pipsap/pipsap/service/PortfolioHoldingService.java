@@ -34,7 +34,9 @@ public class PortfolioHoldingService {
     private SecurityService securityService;
 
     @Transactional
-    public PortfolioHolding createHolding(Integer portfolioId, String symbol, Integer quantity, BigDecimal averagePurchasePrice) {
+    public PortfolioHolding createHolding(Integer portfolioId, String symbol, Integer quantity) {
+        System.out.println("PortfolioHoldingService: Starting createHolding with portfolioId: " + portfolioId + ", symbol: " + symbol + ", quantity: " + quantity);
+        
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
             .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
@@ -45,7 +47,7 @@ public class PortfolioHoldingService {
         holding.setPortfolio(portfolio);
         holding.setSecurity(security);
         holding.setQuantity(quantity);
-        holding.setAveragePurchasePrice(averagePurchasePrice);
+        holding.setAveragePurchasePrice(security.getStaticPrice());
 
         return portfolioHoldingRepository.save(holding);
     }
