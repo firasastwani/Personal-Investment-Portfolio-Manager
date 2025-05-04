@@ -3,17 +3,15 @@ interface Stock {
     id: number
     symbol: string;
     name: string;
-    price: number;
+    staticPrice: number;
 }
 
 interface StockRowProps {
     stock: Stock;
-    onAddToWatchList: (symbol: string) => void;
-    onRemoveFromWatchList: (symbol: string) => void;
 }
 
 
-const StockRow: React.FC<StockRowProps> = ({ stock, onAddToWatchList, onRemoveFromWatchList }) => {
+const StockRow: React.FC<StockRowProps> = ({ stock }) => {
     return (
         <tr className="hover:bg-gray-50" key={stock.id} data-symbol={stock.symbol}>
             <td className="px-6 py-4 whitespace-nowrap">
@@ -23,7 +21,7 @@ const StockRow: React.FC<StockRowProps> = ({ stock, onAddToWatchList, onRemoveFr
                 <div className="font-medium">{stock.symbol}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="font-medium">{stock.price.toFixed(2)}</div>
+                <div className="font-medium">{stock.staticPrice.toFixed(2)}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrapo text-right">
                 <button

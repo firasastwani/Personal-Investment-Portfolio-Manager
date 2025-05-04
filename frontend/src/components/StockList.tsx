@@ -5,14 +5,15 @@ interface Stock {
     id: number;
     symbol: string;
     name: string;
-    price: number;
+    staticPrice: number;
 }
 
 interface StockListProps {
     stocks: Stock[];
+    handleAction: (symbol: string) => void;
 }
 
-const StockList: React.FC<StockListProps> = ({ stocks }) => {
+const StockList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
     const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
         const button = target.closest("button[data-action='add-to-watchlist']");
@@ -21,13 +22,21 @@ const StockList: React.FC<StockListProps> = ({ stocks }) => {
             const symbol = row?.getAttribute('data-symbol');
 
             if (symbol) {
-                handleAddToWatchList(symbol);
+                handleAction(symbol);
             }
         }
     }, []);
 
     const handleAddToWatchList = (symbol: string) => {
         console.log(`Adding ${symbol} to watchlist`);
+        try {
+            const response = fetch(`http://localhost:8080/api/watchlist/${symbol}`, {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch (error) {
+            console.error("Error adding to watchlist:", error);
+        }
     }
 
     return (
@@ -56,8 +65,6 @@ const StockList: React.FC<StockListProps> = ({ stocks }) => {
                         <StockRow
                             key={stock.id}
                             stock={stock}
-                            onAddToWatchList={handleAddToWatchList}
-                            onRemoveFromWatchList={() => {}}
                         />
                     ))}
                 </tbody>
