@@ -7,11 +7,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "portfolio_holdings")
 public class PortfolioHolding {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "holding_id")
-    private Integer holdingId;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id", nullable = false)
@@ -27,22 +26,21 @@ public class PortfolioHolding {
     @Column(name = "average_purchase_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal averagePurchasePrice;
 
-    @Column(name = "current_value", nullable = false, precision = 10, scale = 2)
-    private BigDecimal currentValue;
-
-    @Column(name = "last_updated")
+    @Column(name = "last_updated", nullable = false, updatable = false)
     private LocalDateTime lastUpdated;
 
-    // Default constructor
-    public PortfolioHolding() {}
-
-    // Getters and Setters
-    public Integer getHoldingId() {
-        return holdingId;
+    @PrePersist
+    protected void onCreate() {
+        lastUpdated = LocalDateTime.now();
     }
 
-    public void setHoldingId(Integer holdingId) {
-        this.holdingId = holdingId;
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Portfolio getPortfolio() {
@@ -61,14 +59,6 @@ public class PortfolioHolding {
         this.security = security;
     }
 
-    public String getSymbol() {
-        return security != null ? security.getSymbol() : null;
-    }
-
-    public void setSymbol(String symbol) {
-        // This is a derived field from security, so we don't need to set it
-    }
-
     public Integer getQuantity() {
         return quantity;
     }
@@ -83,17 +73,6 @@ public class PortfolioHolding {
 
     public void setAveragePurchasePrice(BigDecimal averagePurchasePrice) {
         this.averagePurchasePrice = averagePurchasePrice;
-    }
-
-    public BigDecimal getCurrentValue() {
-        if (security != null && quantity != null) {
-            return security.getStaticPrice().multiply(new BigDecimal(quantity));
-        }
-        return currentValue;
-    }
-
-    public void setCurrentValue(BigDecimal currentValue) {
-        this.currentValue = currentValue;
     }
 
     public LocalDateTime getLastUpdated() {

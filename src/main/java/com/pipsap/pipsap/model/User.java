@@ -1,7 +1,9 @@
 package com.pipsap.pipsap.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -11,21 +13,19 @@ public class User {
     @Column(name = "user_id")
     private Integer userId;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public User() {}
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<WatchlistItem> watchlistItems;
 
     // Getters and Setters
     public Integer getUserId() {
@@ -58,5 +58,13 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<WatchlistItem> getWatchlistItems() {
+        return watchlistItems;
+    }
+
+    public void setWatchlistItems(List<WatchlistItem> watchlistItems) {
+        this.watchlistItems = watchlistItems;
     }
 } 

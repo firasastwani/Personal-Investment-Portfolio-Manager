@@ -1,5 +1,6 @@
 package com.pipsap.pipsap.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,10 +11,11 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transaction_id")
-    private Integer transactionId;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id", nullable = false)
+    @JsonIgnore
     private Portfolio portfolio;
 
     @ManyToOne
@@ -22,27 +24,36 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false)
-    private TransactionType transactionType;
+    private TransactionType type;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "transaction_date", nullable = false)
+    @Column(name = "transaction_date", nullable = false, updatable = false)
     private LocalDateTime transactionDate;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    // Getters and Setters
-    public Integer getTransactionId() {
-        return transactionId;
+    @PrePersist
+    protected void onCreate() {
+        transactionDate = LocalDateTime.now();
     }
 
-    public void setTransactionId(Integer transactionId) {
-        this.transactionId = transactionId;
+    public enum TransactionType {
+        BUY, SELL
+    }
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Portfolio getPortfolio() {
@@ -61,12 +72,12 @@ public class Transaction {
         this.security = security;
     }
 
-    public TransactionType getTransactionType() {
-        return transactionType;
+    public TransactionType getType() {
+        return type;
     }
 
-    public void setTransactionType(TransactionType transactionType) {
-        this.transactionType = transactionType;
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public BigDecimal getQuantity() {

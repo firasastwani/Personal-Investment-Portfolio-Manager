@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/portfolios/{portfolioId}/holdings")
+@RequestMapping("/api/holdings")
 public class PortfolioHoldingController {
 
     private final PortfolioHoldingService portfolioHoldingService;
@@ -27,131 +27,62 @@ public class PortfolioHoldingController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping
-    public ResponseEntity<?> getPortfolioHoldings(@PathVariable Integer portfolioId) {
+    @PostMapping
+    public ResponseEntity<PortfolioHolding> createHolding(
+            @RequestParam Integer portfolioId,
+            @RequestParam String symbol,
+            @RequestParam Integer quantity,
+            @RequestParam BigDecimal averagePurchasePrice) {
+        try {
+            PortfolioHolding holding = portfolioHoldingService.createHolding(
+                portfolioId, symbol, quantity, averagePurchasePrice);
+            return ResponseEntity.ok(holding);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/portfolio/{portfolioId}")
+    public ResponseEntity<List<PortfolioHolding>> getHoldingsByPortfolio(@PathVariable Integer portfolioId) {
         try {
             List<PortfolioHolding> holdings = portfolioHoldingService.getHoldingsByPortfolioId(portfolioId);
             return ResponseEntity.ok(holdings);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error retrieving portfolio holdings: " + e.getMessage()
-            ));
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @GetMapping("/{symbol}")
-    public ResponseEntity<?> getHoldingBySymbol(
-            @PathVariable Integer portfolioId,
-            @PathVariable String symbol) {
+    @GetMapping("/{id}")
+    public ResponseEntity<PortfolioHolding> getHoldingById(@PathVariable Integer id) {
         try {
-            Optional<Portfolio> portfolio = portfolioService.getPortfolioById(portfolioId);
-            if (portfolio.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Optional<PortfolioHolding> holding = portfolioHoldingService
-                .getHoldingByPortfolioAndSymbol(portfolio.get(), symbol);
-            
-            return holding.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            return portfolioHoldingService.getHoldingById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error retrieving holding: " + e.getMessage()
-            ));
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> addHolding(
-            @PathVariable Integer portfolioId,
-            @RequestBody PortfolioHolding holding) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PortfolioHolding> updateHolding(
+            @PathVariable Integer id,
+            @RequestParam Integer quantity,
+            @RequestParam BigDecimal averagePurchasePrice) {
         try {
-            Optional<Portfolio> portfolio = portfolioService.getPortfolioById(portfolioId);
-            if (portfolio.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            holding.setPortfolio(portfolio.get());
-            PortfolioHolding savedHolding = portfolioHoldingService.addHolding(holding);
-            return ResponseEntity.ok(savedHolding);
+            PortfolioHolding holding = portfolioHoldingService.updateHolding(id, quantity, averagePurchasePrice);
+            return ResponseEntity.ok(holding);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error adding holding: " + e.getMessage()
-            ));
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @PutMapping("/{holdingId}")
-    public ResponseEntity<?> updateHolding(
-            @PathVariable Integer portfolioId,
-            @PathVariable Integer holdingId,
-            @RequestBody PortfolioHolding holding) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteHolding(@PathVariable Integer id) {
         try {
-            Optional<Portfolio> portfolio = portfolioService.getPortfolioById(portfolioId);
-            if (portfolio.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            holding.setPortfolio(portfolio.get());
-            holding.setHoldingId(holdingId);
-            PortfolioHolding updatedHolding = portfolioHoldingService.updateHolding(holding);
-            return ResponseEntity.ok(updatedHolding);
+            portfolioHoldingService.deleteHolding(id);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error updating holding: " + e.getMessage()
-            ));
-        }
-    }
-
-    @PutMapping("/{holdingId}/value")
-    public ResponseEntity<?> updateHoldingValue(
-            @PathVariable Integer portfolioId,
-            @PathVariable Integer holdingId,
-            @RequestBody Map<String, BigDecimal> request) {
-        try {
-            BigDecimal newValue = request.get("value");
-            if (newValue == null) {
-                return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", "Value is required"
-                ));
-            }
-
-            PortfolioHolding updatedHolding = portfolioHoldingService
-                .updateHoldingValue(holdingId, newValue);
-            
-            if (updatedHolding == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok(updatedHolding);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error updating holding value: " + e.getMessage()
-            ));
-        }
-    }
-
-    @DeleteMapping("/{holdingId}")
-    public ResponseEntity<?> deleteHolding(
-            @PathVariable Integer portfolioId,
-            @PathVariable Integer holdingId) {
-        try {
-            portfolioHoldingService.deleteHolding(holdingId);
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Holding deleted successfully"
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error deleting holding: " + e.getMessage()
-            ));
+            return ResponseEntity.badRequest().build();
         }
     }
 } 

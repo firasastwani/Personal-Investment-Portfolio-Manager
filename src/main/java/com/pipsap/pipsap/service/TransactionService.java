@@ -1,31 +1,66 @@
 package com.pipsap.pipsap.service;
 
 import com.pipsap.pipsap.model.Transaction;
+import com.pipsap.pipsap.model.Security;
 import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    public List<Transaction> getTransactionsByPortfolio(Portfolio portfolio) {
-        return transactionRepository.findByPortfolio(portfolio);
-    }
+    @Autowired
+    private SecurityService securityService;
 
-    public Transaction createTransaction(Transaction transaction) {
+    @Autowired
+    private PortfolioService portfolioService;
+
+    @Transactional
+    public Transaction createTransaction(
+            Integer portfolioId,
+            String symbol,
+            Transaction.TransactionType type,
+            BigDecimal quantity,
+            BigDecimal price,
+            String notes) {
+        // Get the portfolio
+        Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+
+        // Get the security
+        Security security = securityService.getSecurityBySymbol(symbol)
+            .orElseThrow(() -> new RuntimeException("Security not found"));
+
+        // Create new transaction
+        Transaction transaction = new Transaction();
+        transaction.setPortfolio(portfolio);
+        transaction.setSecurity(security);
+        transaction.setType(type);
+        transaction.setQuantity(quantity);
+        transaction.setPrice(price);
+        transaction.setNotes(notes);
+
         return transactionRepository.save(transaction);
     }
 
-    public Transaction getTransactionById(Integer transactionId) {
-        return transactionRepository.findById(transactionId).orElse(null);
+    public List<Transaction> getTransactionsByPortfolioId(Integer portfolioId) {
+        return transactionRepository.findByPortfolio_PortfolioId(portfolioId);
     }
 
-    public void deleteTransaction(Integer transactionId) {
-        transactionRepository.deleteById(transactionId);
+    public Optional<Transaction> getTransactionById(Integer id) {
+        return transactionRepository.findById(id);
+    }
+
+    @Transactional
+    public void deleteTransaction(Integer id) {
+        transactionRepository.deleteById(id);
     }
 } 

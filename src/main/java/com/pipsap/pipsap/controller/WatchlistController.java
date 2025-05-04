@@ -1,49 +1,54 @@
 package com.pipsap.pipsap.controller;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
+import com.pipsap.pipsap.model.WatchlistItem;
+import com.pipsap.pipsap.service.WatchlistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import com.pipsap.pipsap.model.User;    
-import com.pipsap.pipsap.model.WatchlistItem;
-import com.pipsap.pipsap.service.UserService;
-import com.pipsap.pipsap.service.WatchlistService;
-
 @RestController
 @RequestMapping("/api/watchlist")
+@CrossOrigin(origins = "*")
 public class WatchlistController {
-
-    @Autowired
-    private UserService userService;
-
     @Autowired
     private WatchlistService watchlistService;
 
-    @GetMapping
-    public ResponseEntity<?> getWatchlist() {
-
-        User user = userService.getLoggedInUser();
-        List<WatchlistItem> watchlistItems = watchlistService.getWatchlistByUser(user);
-
-        return ResponseEntity.ok(watchlistItems);
-    }
-
-    @PostMapping
-    public ResponseEntity<?> addToWatchlist(@RequestBody WatchlistItem watchlistItem) {
-
-        User user = userService.getLoggedInUser();
-        watchlistItem.setUser(user);
-        watchlistService.addToWatchlist(watchlistItem);
-        return ResponseEntity.ok().build();
+    @PostMapping("/{symbol}")
+    public ResponseEntity<WatchlistItem> addToWatchlist(@PathVariable String symbol) {
+        try {
+            System.out.println("Adding symbol to watchlist: " + symbol);
+            WatchlistItem item = watchlistService.addToWatchlist(symbol);
+            return ResponseEntity.ok(item);
+        } catch (Exception e) {
+            System.err.println("Error adding to watchlist: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeFromWatchlist(@PathVariable Integer id) {
+    public ResponseEntity<Void> removeFromWatchlist(@PathVariable Integer id) {
+        try {
+            watchlistService.removeFromWatchlist(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.println("Error removing from watchlist: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
-        User user = userService.getLoggedInUser();
-        watchlistService.removeFromWatchlist(id);
-        return ResponseEntity.ok().build();
+    @GetMapping
+    public ResponseEntity<List<WatchlistItem>> getWatchlist() {
+        try {
+            List<WatchlistItem> items = watchlistService.getWatchlistByUser();
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            System.err.println("Error getting watchlist: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 } 

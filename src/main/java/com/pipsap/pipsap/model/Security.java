@@ -1,43 +1,50 @@
 package com.pipsap.pipsap.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "securities")
 public class Security {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "security_id")
+    private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 10)
     private String symbol;
 
-    @Column(nullable = false)
+    @Column(length = 100)
     private String name;
 
-    @Column
-    private String type; // e.g., STOCK, ETF, BOND
-
-    @Column
+    @Column(length = 50)
     private String exchange;
+
+    @Column(length = 100)
+    private String sector;
 
     @Column(name = "static_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal staticPrice;
 
-    @OneToMany(mappedBy = "security", cascade = CascadeType.ALL)
-    private Set<Transaction> transactions;
+    @Column(length = 10)
+    private String currency;
 
-    @OneToMany(mappedBy = "security", cascade = CascadeType.ALL)
-    private Set<WatchlistItem> watchlistItems;
+    @OneToMany(mappedBy = "security")
+    @JsonIgnore
+    private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "security")
+    @JsonIgnore
+    private List<WatchlistItem> watchlistItems;
 
     // Getters and Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -57,20 +64,20 @@ public class Security {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getExchange() {
         return exchange;
     }
 
     public void setExchange(String exchange) {
         this.exchange = exchange;
+    }
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
     }
 
     public BigDecimal getStaticPrice() {
@@ -81,19 +88,27 @@ public class Security {
         this.staticPrice = staticPrice;
     }
 
-    public Set<Transaction> getTransactions() {
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public List<Transaction> getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(Set<Transaction> transactions) {
+    public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
 
-    public Set<WatchlistItem> getWatchlistItems() {
+    public List<WatchlistItem> getWatchlistItems() {
         return watchlistItems;
     }
 
-    public void setWatchlistItems(Set<WatchlistItem> watchlistItems) {
+    public void setWatchlistItems(List<WatchlistItem> watchlistItems) {
         this.watchlistItems = watchlistItems;
     }
 } 

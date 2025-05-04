@@ -24,7 +24,7 @@ public class SecurityService {
 
     public List<Security> getAllSecurities() {
         List<Security> securities = new ArrayList<>();
-        final String sql = "SELECT security_id, symbol, name, type, exchange, static_price, sector, currency FROM securities";
+        final String sql = "SELECT security_id, symbol, name, exchange, sector, static_price, currency FROM securities";
 
         try (Connection conn = dataSource.getConnection()) {
             System.out.println("SecurityService: Successfully connected to database");
@@ -37,12 +37,13 @@ public class SecurityService {
                     
                     while (rs.next()) {
                         Security security = new Security();
-                        security.setId(rs.getLong("security_id"));
+                        security.setId(rs.getInt("security_id"));
                         security.setSymbol(rs.getString("symbol"));
                         security.setName(rs.getString("name"));
-                        security.setType(rs.getString("type"));
                         security.setExchange(rs.getString("exchange"));
+                        security.setSector(rs.getString("sector"));
                         security.setStaticPrice(rs.getBigDecimal("static_price"));
+                        security.setCurrency(rs.getString("currency"));
                         securities.add(security);
                         System.out.println("SecurityService: Added security: " + security.getSymbol());
                     }
@@ -62,11 +63,10 @@ public class SecurityService {
     }
 
     public Security createSecurity(Security security) {
-
         return securityRepository.save(security);
     }
 
-    public Optional<Security> getSecurityById(Long id) {
+    public Optional<Security> getSecurityById(Integer id) {
         return securityRepository.findById(id);
     }
 
@@ -86,7 +86,7 @@ public class SecurityService {
         return securityRepository.save(security);
     }
 
-    public void deleteSecurity(Long id) {
+    public void deleteSecurity(Integer id) {
         securityRepository.deleteById(id);
     }
 } 

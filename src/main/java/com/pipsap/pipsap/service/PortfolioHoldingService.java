@@ -27,65 +27,59 @@ public class PortfolioHoldingService {
         this.securityRepository = securityRepository;
     }
 
+    @Autowired
+    private PortfolioService portfolioService;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Transactional
+    public PortfolioHolding createHolding(Integer portfolioId, String symbol, Integer quantity, BigDecimal averagePurchasePrice) {
+        Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+
+        Security security = securityService.getSecurityBySymbol(symbol)
+            .orElseThrow(() -> new RuntimeException("Security not found"));
+
+        PortfolioHolding holding = new PortfolioHolding();
+        holding.setPortfolio(portfolio);
+        holding.setSecurity(security);
+        holding.setQuantity(quantity);
+        holding.setAveragePurchasePrice(averagePurchasePrice);
+
+        return portfolioHoldingRepository.save(holding);
+    }
+
     public List<PortfolioHolding> getHoldingsByPortfolio(Portfolio portfolio) {
-        List<PortfolioHolding> holdings = portfolioHoldingRepository.findByPortfolio(portfolio);
-        holdings.forEach(this::updateCurrentValue);
-        return holdings;
+        return portfolioHoldingRepository.findByPortfolio(portfolio);
     }
 
     public List<PortfolioHolding> getHoldingsByPortfolioId(Integer portfolioId) {
-        List<PortfolioHolding> holdings = portfolioHoldingRepository.findByPortfolio_PortfolioId(portfolioId);
-        holdings.forEach(this::updateCurrentValue);
-        return holdings;
+        return portfolioHoldingRepository.findByPortfolio_PortfolioId(portfolioId);
     }
 
-    public Optional<PortfolioHolding> getHoldingByPortfolioAndSymbol(Portfolio portfolio, String symbol) {
-        Optional<Security> security = securityRepository.findBySymbol(symbol);
-        if (security.isEmpty()) {
-            return Optional.empty();
-        }
-        Optional<PortfolioHolding> holding = portfolioHoldingRepository.findByPortfolioAndSecurity(portfolio, security.get());
-        holding.ifPresent(this::updateCurrentValue);
-        return holding;
+    public List<PortfolioHolding> getHoldingsBySecurity(Security security) {
+        return portfolioHoldingRepository.findBySecurity(security);
+    }
+
+    public Optional<PortfolioHolding> getHoldingById(Integer id) {
+        return portfolioHoldingRepository.findById(id);
     }
 
     @Transactional
-    public PortfolioHolding addHolding(PortfolioHolding holding) {
-        updateCurrentValue(holding);
-        holding.setLastUpdated(LocalDateTime.now());
+    public void deleteHolding(Integer id) {
+        portfolioHoldingRepository.deleteById(id);
+    }
+
+    @Transactional
+    public PortfolioHolding updateHolding(Integer id, Integer quantity, BigDecimal averagePurchasePrice) {
+        PortfolioHolding holding = portfolioHoldingRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Holding not found"));
+
+        holding.setQuantity(quantity);
+        holding.setAveragePurchasePrice(averagePurchasePrice);
+
         return portfolioHoldingRepository.save(holding);
-    }
-
-    @Transactional
-    public PortfolioHolding updateHolding(PortfolioHolding holding) {
-        updateCurrentValue(holding);
-        holding.setLastUpdated(LocalDateTime.now());
-        return portfolioHoldingRepository.save(holding);
-    }
-
-    @Transactional
-    public void deleteHolding(Integer holdingId) {
-        portfolioHoldingRepository.deleteById(holdingId);
-    }
-
-    @Transactional
-    public PortfolioHolding updateHoldingValue(Integer holdingId, BigDecimal newValue) {
-        Optional<PortfolioHolding> holdingOpt = portfolioHoldingRepository.findById(holdingId);
-        if (holdingOpt.isPresent()) {
-            PortfolioHolding holding = holdingOpt.get();
-            holding.setCurrentValue(newValue);
-            holding.setLastUpdated(LocalDateTime.now());
-            return portfolioHoldingRepository.save(holding);
-        }
-        return null;
-    }
-
-    private void updateCurrentValue(PortfolioHolding holding) {
-        if (holding.getSecurity() != null && holding.getQuantity() != null) {
-            BigDecimal currentValue = holding.getSecurity().getStaticPrice()
-                .multiply(new BigDecimal(holding.getQuantity()));
-            holding.setCurrentValue(currentValue);
-        }
     }
 
     public boolean holdingExists(Portfolio portfolio, String symbol) {

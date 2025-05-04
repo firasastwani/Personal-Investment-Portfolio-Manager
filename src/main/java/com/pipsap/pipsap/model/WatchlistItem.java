@@ -1,34 +1,40 @@
 package com.pipsap.pipsap.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "watchlist_items")
+@Table(name = "watchlist")
 public class WatchlistItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "watchlist_id")
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "security_id", nullable = false)
     private Security security;
 
-    @Column
-    private Double targetPrice;
+    @Column(name = "added_at", nullable = false, updatable = false)
+    private LocalDateTime addedAt;
 
-    @Column
-    private String notes;
+    @PrePersist
+    protected void onCreate() {
+        addedAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -48,19 +54,11 @@ public class WatchlistItem {
         this.security = security;
     }
 
-    public Double getTargetPrice() {
-        return targetPrice;
+    public LocalDateTime getAddedAt() {
+        return addedAt;
     }
 
-    public void setTargetPrice(Double targetPrice) {
-        this.targetPrice = targetPrice;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setAddedAt(LocalDateTime addedAt) {
+        this.addedAt = addedAt;
     }
 } 
