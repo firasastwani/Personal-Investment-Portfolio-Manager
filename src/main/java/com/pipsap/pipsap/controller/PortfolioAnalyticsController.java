@@ -23,7 +23,7 @@ public class PortfolioAnalyticsController {
 
     @GetMapping("/securities/top-performing")
     public ResponseEntity<List<Map<String, Object>>> getTopPerformingSecurities(
-            @RequestParam(defaultValue = "2") int minPortfolios,
+            @RequestParam(defaultValue = "1") int minPortfolios,
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(portfolioAnalyticsService.getTopPerformingSecurities(minPortfolios, limit));
     }
@@ -33,5 +33,11 @@ public class PortfolioAnalyticsController {
             @PathVariable Integer portfolioId,
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(portfolioAnalyticsService.getPortfolioTransactionHistory(portfolioId, limit));
+    }
+
+    @GetMapping("/portfolio/{portfolioId}/total-value")
+    public ResponseEntity<Double> getTotalValueOfHoldings(
+            @PathVariable Integer portfolioId) {
+        return ResponseEntity.ok(portfolioAnalyticsService.getTotalValueOfHoldings(portfolioId));
     }
 } 

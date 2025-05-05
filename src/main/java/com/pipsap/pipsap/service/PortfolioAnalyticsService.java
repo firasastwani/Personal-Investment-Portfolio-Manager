@@ -177,4 +177,30 @@ public class PortfolioAnalyticsService {
         
         return results;
     }
+
+    /**
+     * Get total value of holdings in a portfolio
+     * @param portfolioId The ID of the portfolio
+     * @return Total value of holdings in the portfolio
+     */
+    public double getTotalValueOfHoldings(Integer portfolioId) {
+        final String sql = """
+            SELECT SUM(ph.current_value) as total_value
+            FROM portfolio_holdings ph
+            WHERE ph.portfolio_id = ?
+            """;    
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, portfolioId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total_value");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 } 

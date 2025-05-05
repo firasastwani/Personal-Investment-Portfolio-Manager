@@ -20,6 +20,7 @@ export default function PortfolioPage() {
     const router = useRouter();
     const [stocks, setStocks] = useState<portfolioData[]>([]);
     const [fetching, setFetching] = useState(true);
+    const [totalValue, setTotalValue] = useState(0);
 
     const params = useParams();
     const id = params.id as string;
@@ -60,6 +61,21 @@ export default function PortfolioPage() {
 
     }
 
+    const fetchTotal = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/analytics/portfolio/${id}/total-value`, {
+                method: "GET",
+                credentials: "include",
+            });
+
+            const data = await response.json();
+
+            setTotalValue(data);
+        } catch(error) {
+            console.error("Error fetching totals:", error);
+        }
+    }
+
     const fetchStocks = async () => {
         try {
             const response = await fetch(`http://localhost:8080/api/holdings/portfolio/${id}`, {
@@ -94,6 +110,9 @@ export default function PortfolioPage() {
         }
     }, [user]);
 
+    useEffect(() => {
+        fetchTotal();
+    }, [stocks])
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-100">
@@ -102,6 +121,7 @@ export default function PortfolioPage() {
                 <div className="bg-white p-6 rounded shadow-md w-full text-center">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Portfolio: {name}</h2>
+                        <h3 className="text-xl mb-4">Total Value: {totalValue}</h3>
                         <button onClick={handleOnClick} className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
                             Buy Stock
                         </button>
