@@ -1,5 +1,6 @@
 package com.pipsap.pipsap.service;
 
+import com.pipsap.pipsap.service.UserService;
 import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.model.PortfolioHolding;
@@ -13,8 +14,15 @@ import java.util.Optional;
 
 @Service
 public class PortfolioService {
+
     @Autowired
     private PortfolioRepository portfolioRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserService User;
 
     @Autowired
     private PortfolioHoldingRepository portfolioHoldingRepository;
@@ -34,8 +42,6 @@ public class PortfolioService {
     public List<Portfolio> getPortfoliosByUserId(Integer userId) {
         return portfolioRepository.findByUser_UserId(userId);
     }
-
-    
 
     public Portfolio updatePortfolio(Portfolio portfolio) {
         return portfolioRepository.save(portfolio);

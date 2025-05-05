@@ -1,27 +1,51 @@
 package com.pipsap.pipsap.controller;
 
 import com.pipsap.pipsap.model.Portfolio;
+import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.service.PortfolioService;
+import com.pipsap.pipsap.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.Optional;
-
+import java.util.Map;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolios")
+@CrossOrigin(origins = "*")
 public class PortfolioController {
 
     @Autowired
     private PortfolioService portfolioService;
 
-    @GetMapping
-    public ResponseEntity<List<Portfolio>> getAllPortfolios() {
-        List<Portfolio> portfolios = portfolioService.getAllPortfolios();
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/getPortfoliosForUser")
+    public ResponseEntity<List<Portfolio>> getPortfoliosByUsername(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println("Fetching portfolios for username: " + username);
+
+        int userId = userService.getUserIdByUsername(username);
+
+        List<Portfolio> portfolios = portfolioService.getPortfoliosByUserId(userId);
+
+        if (portfolios.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok(portfolios);
     }
+
+    
 
     @GetMapping("/{id}/holdings")
     public ResponseEntity<List<PortfolioHolding>> getPortfolioHoldings(@PathVariable Integer id) {
@@ -42,7 +66,7 @@ public class PortfolioController {
         return ResponseEntity.ok(portfolio.get());
     }
 
-    @PostMapping
+    @PostMapping("/{id}")
     public ResponseEntity<?> createPortfolio(@RequestBody Portfolio portfolio) {
         Portfolio createdPortfolio = portfolioService.createPortfolio(portfolio);
         return ResponseEntity.ok(createdPortfolio);

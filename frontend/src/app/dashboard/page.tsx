@@ -1,6 +1,6 @@
 "use client";
 
-import TabBar from "@/components/TabBar"
+import TabBar from "@/components/TabBar";
 import { useAuth } from "../AuthContext/AuthContext";
 import { useRouter } from "next/navigation";
 import PortfolioList from "@/components/PortfolioList";
@@ -13,34 +13,62 @@ interface Stock {
     staticPrice: number;
 }
 
+interface Portfolio {
+    portfolioId: number;
+    name: string;
+    description: string;
+    createdAt: string;
+}
 
 export default function Dashboard() {
     const { user, loading } = useAuth();
     const router = useRouter();
-    const [portfolios, setPortfolios] = useState([]);
+    const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [fetching, setFetching] = useState(true);
 
-    type stockData = {
-        id: number;
-        name: string;
-        description: string;
-        created_at: Date;
-    }
-
     const fetchPortfolios = async () => {
-
+        if (!user || !user.username) {
+            console.error("Username is not available");
+            setFetching(false); // ← important!
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:8080/api/portfolios/getPortfoliosForUser", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: user.username }),
+                credentials: 'include'
+            });
+    
+            if (!response.ok) {
+                console.error("Failed to fetch portfolios");
+                setFetching(false); // ← mark fetch done even if failed
+                return;
+            }
+    
+            const data = await response.json();
+            setPortfolios(data);
+        } catch (error) {
+            console.error("Error fetching portfolios:", error);
+        } finally {
+            setFetching(false); // ← always stop fetching
+        }
     };
+    
+    
 
     useEffect(() => {
         if (user) {
-            console.log("Fetching portfolios for user:", user.username);
+            fetchPortfolios();
         }
     }, [user]);
 
     const handleRemove = (id: number) => {
         console.log(`Removing portfolio with id: ${id}`);
+        // Add logic here to remove the portfolio if necessary
     };
-
 
     if (loading) {
         return <div>Loading...</div>;
@@ -48,10 +76,11 @@ export default function Dashboard() {
     if (!user) {
         return <div>Please log in to access the watchlist.</div>;
     }
+
     const handleOnClick = () => {
         console.log("Adding new portfolio");
         router.push("/portfolio/create");
-    }
+    };
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-100">
@@ -60,20 +89,38 @@ export default function Dashboard() {
                 <div className="bg-white p-6 rounded shadow-md w-full text-center">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">{user.username}'s Watchlist</h2>
-                        <button onClick={handleOnClick} className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                        <button
+                            onClick={handleOnClick}
+                            className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                        >
                             Add New Portfolio
                         </button>
                     </div>
-                    {portfolios.length > 0 ? (
-                        <PortfolioList portfolios={portfolios} handleAction={handleRemove} />
+                    {fetching ? (
+                        <p>Loading portfolios...</p>
+                    ) : portfolios.length > 0 ? (
+                        <div>
+                            {portfolios.map((portfolio) => (
+                                <div key={portfolio.portfolioId} className="border-b py-4">
+                                    <h3 className="text-xl font-semibold">{portfolio.name}</h3>
+                                    <p className="text-gray-600">{portfolio.description}</p>
+                                    <p className="text-sm text-gray-400">
+                                        Created at: {new Date(portfolio.createdAt).toLocaleString()}
+                                    </p>
+                                    <button
+                                        onClick={() => handleRemove(portfolio.portfolioId)}
+                                        className="mt-2 text-red-500 hover:text-red-600"
+                                    >
+                                        Remove Portfolio
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     ) : (
-                            <p className="mb-4">No Portfolios Found</p>
-                        )
-                    }
-                    {/* <p className="mb-4">Your watchlist is empty.</p> */}
-                    {/* <StockList stocks={stocks} handleAction={() => { }} /> */}
+                        <p className="mb-4">No Portfolios Found</p>
+                    )}
                 </div>
             </div>
         </div>
-    )
+    );
 }

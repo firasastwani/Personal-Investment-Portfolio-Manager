@@ -116,5 +116,28 @@ public class UserService {
         return user;
     }
 
+    //Get user id from username
+    public Integer getUserIdByUsername(String username) {
+
+        final String sql = "SELECT user_id FROM users WHERE username = ?";
+        Integer userId = null;
+    
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+    
+            if (rs.next()) {
+                userId = rs.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error getting user ID by username", e);
+        }
+    
+        return userId;
+    }
+    
+
     
 } 
