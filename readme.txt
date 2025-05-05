@@ -45,3 +45,18 @@ password: password
 
 username: test2
 password: password
+
+HOW TO RUN
+First, type 
+cd frontend in powershell
+Then type and wait for installation
+npm install
+Then type to start the frontend
+npm run dev 
+
+For backend
+Type to compile the code
+mvn clean package
+Then type to start the backend 
+mvn sprint-boot:run 
+
