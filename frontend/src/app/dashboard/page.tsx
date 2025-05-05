@@ -101,7 +101,7 @@ export default function Dashboard() {
             <div className="flex-grow justify-center pt-4 px-20">
                 <div className="bg-white p-6 rounded shadow-md w-full text-center">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold mb-4">{user.username}'s Watchlist</h2>
+                        <h2 className="text-2xl font-bold mb-4">{user.username}'s Dashboard</h2>
                         <button
                             onClick={handleOnClick}
                             className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
@@ -122,7 +122,7 @@ export default function Dashboard() {
                                     </p>
                                     <div className="flex-col w-full">
                                         <button
-                                            onClick={() => router.push(`/portfolio/${portfolio.portfolioId}`)}
+                                            onClick={() => router.push(`/portfolio/${portfolio.portfolioId}?name=${portfolio.name}`)}
                                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                                         >
                                             View Portfolio
