@@ -7,6 +7,13 @@ security.txt
 perf.txt
 
 Wayne Lam
+Developed Next.js frontend
+- login/register page
+- watchlist
+- stocks
+- profile
+- buy/sell configuration
+Managed frontend events and integrated backend APIs
 
 Firas Astwani 
 prelim.pdf
