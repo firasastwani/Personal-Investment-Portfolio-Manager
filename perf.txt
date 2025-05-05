@@ -1,0 +1,24 @@
+--This is index used to boost sql query performance when searching with name and symbol
+CREATE INDEX idx_symbol ON securities(symbol);
+CREATE INDEX idx_name ON securities(name);
+
+--Before adding index 
+--Executing
+
+EXPLAIN ANALYZE
+SELECT * FROM securities WHERE symbol = 'AMD';
+--giving the result of 0.548s
+
+EXPLAIN ANALYZE
+SELECT * FROM securities WHERE name = 'STERIS';
+--giving the result of 0.357s
+
+--after adding index 
+
+EXPLAIN ANALYZE
+SELECT * FROM securities WHERE symbol = 'AMD';
+--giving the result of 0.0421s
+
+EXPLAIN ANALYZE
+SELECT * FROM securities WHERE name = 'STERIS';
+--giving the result of 0.035s
