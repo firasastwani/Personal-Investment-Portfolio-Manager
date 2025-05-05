@@ -42,15 +42,6 @@ Database name: pipsap_db
 Database username: root
 Database password: mysqlpass
 
-Functional username and password
-username: test1
-password: password
-
-username: test1
-password: password
-
-username: test2
-password: password
 
 HOW TO RUN
 First, type 
