@@ -13,7 +13,6 @@ CREATE INDEX idx_symbol ON securities(symbol);
 CREATE INDEX idx_name ON securities(name);
 
 
-
 INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
 VALUES (
     'AAPL',
@@ -9104,3 +9103,80 @@ VALUES (
     5587.0,
     'USD'
 );
+
+CREATE TABLE if not exists `users` (
+  `user_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `users` (`user_id`, `username`, `password`, `created_at`) VALUES (10,'user1','$2a$10$G8sJ289bzryjCnGUqvanN.j6eD6Bv6/05sImpAoJV9R8xPEm.0VtO','2025-05-05 21:39:54'),(11,'user2','$2a$10$Ajq2S8o7Y8T/PrBnn.QhMuHXJ4eNkwtqb3y0TCrVS63GYUI6lW/AW','2025-05-05 21:40:00'),(12,'user3','$2a$10$BkRR4eGNMWlO9/X4pSEGXOYkvg68grC4xIALRGSvbF0bwktASy3fa','2025-05-05 21:40:06');
+
+
+CREATE TABLE if not exists `portfolios` (
+  `portfolio_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`portfolio_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `portfolios_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `portfolios` (`portfolio_id`, `user_id`, `name`, `description`, `created_at`) VALUES (18,10,'Favorite stocks ','A collection of my favorite stocks','2025-05-05 17:40:49'),(19,10,'Extras','Extra stocks','2025-05-05 17:41:49'),(20,11,'Fun stocks','fun stockssssss','2025-05-05 17:42:26');
+
+CREATE TABLE if not exists `portfolio_holdings` (
+  `holding_id` int NOT NULL AUTO_INCREMENT,
+  `portfolio_id` int NOT NULL,
+  `security_id` int NOT NULL,
+  `quantity` int NOT NULL,
+  `average_purchase_price` decimal(10,2) NOT NULL,
+  `last_updated` datetime DEFAULT CURRENT_TIMESTAMP,
+  `current_value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`holding_id`),
+  UNIQUE KEY `unique_portfolio_security` (`portfolio_id`,`security_id`),
+  KEY `security_id` (`security_id`),
+  CONSTRAINT `portfolio_holdings_ibfk_1` FOREIGN KEY (`portfolio_id`) REFERENCES `portfolios` (`portfolio_id`) ON DELETE CASCADE,
+  CONSTRAINT `portfolio_holdings_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `securities` (`security_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `portfolio_holdings` (`holding_id`, `portfolio_id`, `security_id`, `quantity`, `average_purchase_price`, `last_updated`, `current_value`) VALUES (27,18,3,1,108.92,'2025-05-05 17:41:16',108.92),(28,18,14,1,1131.72,'2025-05-05 17:41:18',1131.72),(29,18,17,1,994.50,'2025-05-05 17:41:20',994.50),(30,18,24,1,72.55,'2025-05-05 17:41:25',72.55),(31,18,27,5,268.71,'2025-05-05 17:41:26',1343.55),(32,18,29,6,71.01,'2025-05-05 17:41:29',426.06),(33,19,84,1,89.12,'2025-05-05 17:41:57',89.12),(34,19,83,1,286.08,'2025-05-05 17:41:57',286.08),(35,19,82,5,294.37,'2025-05-05 17:41:58',1471.85),(36,19,86,5,225.47,'2025-05-05 17:41:59',1127.35),(37,20,153,6,3762.60,'2025-05-05 17:42:39',22575.60),(38,20,154,1,40.34,'2025-05-05 17:42:40',40.34),(39,20,158,1,271.09,'2025-05-05 17:42:41',271.09),(40,20,167,1,108.34,'2025-05-05 17:42:43',108.34);
+
+
+CREATE TABLE if not exists `transactions` (
+  `transaction_id` int NOT NULL AUTO_INCREMENT,
+  `portfolio_id` int NOT NULL,
+  `security_id` int NOT NULL,
+  `transaction_type` enum('BUY','SELL') NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `notes` text,
+  PRIMARY KEY (`transaction_id`),
+  KEY `portfolio_id` (`portfolio_id`),
+  KEY `security_id` (`security_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`portfolio_id`) REFERENCES `portfolios` (`portfolio_id`) ON DELETE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `securities` (`security_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `transactions` (`transaction_id`, `portfolio_id`, `security_id`, `transaction_type`, `quantity`, `price`, `transaction_date`, `notes`) VALUES (111,18,3,'BUY',1.00,108.92,'2025-05-05 17:41:16','Buy transaction'),(112,18,14,'BUY',1.00,1131.72,'2025-05-05 17:41:18','Buy transaction'),(113,18,17,'BUY',1.00,994.50,'2025-05-05 17:41:20','Buy transaction'),(114,18,24,'BUY',1.00,72.55,'2025-05-05 17:41:25','Buy transaction'),(115,18,27,'BUY',1.00,268.71,'2025-05-05 17:41:26','Buy transaction'),(116,18,27,'BUY',1.00,268.71,'2025-05-05 17:41:26','Buy transaction'),(117,18,27,'BUY',1.00,268.71,'2025-05-05 17:41:26','Buy transaction'),(118,18,27,'BUY',1.00,268.71,'2025-05-05 17:41:27','Buy transaction'),(119,18,27,'BUY',1.00,268.71,'2025-05-05 17:41:27','Buy transaction'),(120,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:29','Buy transaction'),(121,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:29','Buy transaction'),(122,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:30','Buy transaction'),(123,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:30','Buy transaction'),(124,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:30','Buy transaction'),(125,18,29,'BUY',1.00,71.01,'2025-05-05 17:41:30','Buy transaction'),(126,19,84,'BUY',1.00,89.12,'2025-05-05 17:41:57','Buy transaction'),(127,19,83,'BUY',1.00,286.08,'2025-05-05 17:41:57','Buy transaction'),(128,19,82,'BUY',1.00,294.37,'2025-05-05 17:41:58','Buy transaction'),(129,19,82,'BUY',1.00,294.37,'2025-05-05 17:41:58','Buy transaction'),(130,19,82,'BUY',1.00,294.37,'2025-05-05 17:41:58','Buy transaction'),(131,19,82,'BUY',1.00,294.37,'2025-05-05 17:41:58','Buy transaction'),(132,19,82,'BUY',1.00,294.37,'2025-05-05 17:41:58','Buy transaction'),(133,19,86,'BUY',1.00,225.47,'2025-05-05 17:41:59','Buy transaction'),(134,19,86,'BUY',1.00,225.47,'2025-05-05 17:41:59','Buy transaction'),(135,19,86,'BUY',1.00,225.47,'2025-05-05 17:41:59','Buy transaction'),(136,19,86,'BUY',1.00,225.47,'2025-05-05 17:41:59','Buy transaction'),(137,19,86,'BUY',1.00,225.47,'2025-05-05 17:41:59','Buy transaction'),(138,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(139,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(140,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(141,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(142,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(143,20,153,'BUY',1.00,3762.60,'2025-05-05 17:42:39','Buy transaction'),(144,20,154,'BUY',1.00,40.34,'2025-05-05 17:42:40','Buy transaction'),(145,20,158,'BUY',1.00,271.09,'2025-05-05 17:42:41','Buy transaction'),(146,20,167,'BUY',1.00,108.34,'2025-05-05 17:42:43','Buy transaction');
+
+CREATE TABLE if not exists `watchlist` (
+  `watchlist_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `security_id` int NOT NULL,
+  `added_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `notes` varchar(255) DEFAULT NULL,
+  `target_price` double DEFAULT NULL,
+  PRIMARY KEY (`watchlist_id`),
+  UNIQUE KEY `unique_user_security` (`user_id`,`security_id`),
+  KEY `security_id` (`security_id`),
+  CONSTRAINT `watchlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `watchlist_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `securities` (`security_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `watchlist` (`watchlist_id`, `user_id`, `security_id`, `added_at`, `notes`, `target_price`) VALUES (9,10,2,'2025-05-05 17:40:57',NULL,NULL),(10,10,1,'2025-05-05 17:40:58',NULL,NULL),(11,10,3,'2025-05-05 17:40:59',NULL,NULL),(12,10,4,'2025-05-05 17:40:59',NULL,NULL),(13,10,5,'2025-05-05 17:41:00',NULL,NULL),(14,11,1,'2025-05-05 17:42:29',NULL,NULL),(15,11,4,'2025-05-05 17:42:30',NULL,NULL),(16,11,9,'2025-05-05 17:42:32',NULL,NULL);
