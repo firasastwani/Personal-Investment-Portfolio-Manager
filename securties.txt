@@ -1,0 +1,20 @@
+In the code we imported java BCryptPasswordEncoder to crypt the user password. This encryption
+encrypts password in one way, so there is no way to look up original user password once it is in database. 
+This is code used to encode the password
+
+passwordEncoder.encode(password) 
+
+Once the password is in database after registration, only way for user to verify the password and login
+is to use passwordEncoder's match function
+
+passwordEncoder.matches(password, storedPassword)
+
+We retrieve user password using username
+
+Select * from users where username = ?;
+
+Once the retrieved password matches with the password entered by the user, backend will send a signal to frontend
+then user is able to login. 
+
+
+
