@@ -11,6 +11,11 @@ CREATE TABLE if not exists users (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+--Inserting demo users
+insert into users(username, password) values("test0", "$2a$10$a75e/bk9XJGgl/6WU3ib1OtaBMHLlwR8qGmozV8Gv9uWRvnJz9AnG");
+insert into users(username, password) values("test1", "$2a$10$a75e/bk9XJGgl/6WU3ib1OtaBMHLlwR8qGmozV8Gv9uWRvnJz9AnG");
+insert into users(username, password) values("test2", "$2a$10$a75e/bk9XJGgl/6WU3ib1OtaBMHLlwR8qGmozV8Gv9uWRvnJz9AnG");
+
 -- Securities Table (moved up to be referenced by other tables)
 CREATE TABLE IF NOT EXISTS securities (
     security_id INT AUTO_INCREMENT PRIMARY KEY,
