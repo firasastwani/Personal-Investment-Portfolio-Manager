@@ -101,6 +101,12 @@ HAVING COUNT(DISTINCT ph.portfolio_id) >= ?
 ORDER BY total_value DESC
 LIMIT ?;
 
+-- Shows the total value of all holdings in a portfolio
+SELECT 
+    SUM(ph.quantity * ph.current_value) as total_value
+FROM portfolio_holdings ph
+WHERE ph.portfolio_id = ?;
+
 -- Search securities
 -- Used in: /securities/search
 SELECT 
