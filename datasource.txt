@@ -1,0 +1,5 @@
+Pulled csv file of Securities from the following website: https://www.ishares.com/us/products/239707/ishares-russell-1000-etf/?dataType=fund&fileName=IWB_holdings&fileType=csv
+
+Then, used a python script to extract the ticker, name, exchange, sector, and static price of each security, which is the only data we need to insert.
+
+Then, used a python script to make SQL insert statements for each security, stored in insert_securities.sql.
