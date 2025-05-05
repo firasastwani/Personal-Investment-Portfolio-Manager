@@ -1,26 +1,25 @@
 import React, { useCallback } from "react";
-import PortfolioRow from "./PortfolioRow";
+import BuyRow from "./BuyRow";
 
-interface Portfolio {
+interface Stock {
     id: number;
-    name: string;
     symbol: string;
-    quantity: number
+    name: string;
     staticPrice: number;
 }
 
-interface PortfolioListProps {
-    portfolios: Portfolio[];
+interface StockListProps {
+    stocks: Stock[];
     handleAction: (symbol: string) => void;
 }
 
-const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction }) => {
+const BuyList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
     const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
-        const button = target.closest("button[data-action='action']");
+        const button = target.closest("button[data-action='add-to-watchlist']");
         if (button) {
             const row = button.closest("tr");
-            const symbol = row?.getAttribute('data-id');
+            const symbol = row?.getAttribute('data-symbol');
 
             if (symbol) {
                 handleAction(symbol);
@@ -54,9 +53,6 @@ const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction
                             Symbol
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Quantity
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Price
                         </th>
                         <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -65,10 +61,10 @@ const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {portfolios.map((portfolio) => (
-                        <PortfolioRow
-                            key={portfolio.id}
-                            portfolio={portfolio}
+                    {stocks.map((stock) => (
+                        <BuyRow
+                            key={stock.id}
+                            stock={stock}
                         />
                     ))}
                 </tbody>
@@ -78,4 +74,4 @@ const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction
 
 }
 
-export default PortfolioList;
+export default BuyList;

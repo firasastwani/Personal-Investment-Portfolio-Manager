@@ -41,13 +41,13 @@ export default function Dashboard() {
                 body: JSON.stringify({ username: user.username }),
                 credentials: 'include'
             });
-    
+
             if (!response.ok) {
                 console.error("Failed to fetch portfolios");
                 setFetching(false); // ← mark fetch done even if failed
                 return;
             }
-    
+
             const data = await response.json();
             setPortfolios(data);
         } catch (error) {
@@ -56,8 +56,8 @@ export default function Dashboard() {
             setFetching(false); // ← always stop fetching
         }
     };
-    
-    
+
+
 
     useEffect(() => {
         if (user) {
@@ -120,12 +120,21 @@ export default function Dashboard() {
                                     <p className="text-sm text-gray-400">
                                         Created at: {new Date(portfolio.createdAt).toLocaleString()}
                                     </p>
-                                    <button
-                                        onClick={() => handleRemove(portfolio.portfolioId)}
-                                        className="mt-2 text-red-500 hover:text-red-600"
-                                    >
-                                        Remove Portfolio
-                                    </button>
+                                    <div className="flex-col w-full">
+                                        <button
+                                            onClick={() => router.push(`/portfolio/${portfolio.portfolioId}`)}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                                        >
+                                            View Portfolio
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleRemove(portfolio.portfolioId)}
+                                            className="text-red-500 border border-red-300 rounded py-2 hover:text-red-600"
+                                        >
+                                            Remove Portfolio
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

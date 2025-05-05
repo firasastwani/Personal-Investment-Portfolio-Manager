@@ -1,9 +1,10 @@
 
 interface Portfolio {
-    id: number
+    id: number;
     name: string;
-    description: string;
-    created_at: Date;
+    symbol: string;
+    quantity: number
+    staticPrice: number;
 }
 
 interface PortfolioRowProps {
@@ -13,22 +14,25 @@ interface PortfolioRowProps {
 
 const WatchRow: React.FC<PortfolioRowProps> = ({ portfolio }) => {
     return (
-        <tr className="hover:bg-gray-50" key={portfolio.id} data-id={portfolio.id}>
+        <tr className="hover:bg-gray-50" key={portfolio.id} data-id={portfolio.symbol}>
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="font-medium">{portfolio.name}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="font-medium">{portfolio.description}</div>
+                <div className="font-medium">{portfolio.symbol}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="font-medium">{portfolio.created_at.toLocaleDateString()}</div>
+                <div className="font-medium">{portfolio.quantity}</div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="font-medium">{portfolio.staticPrice}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrapo text-right">
                 <button
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                    data-action="view-portfolio"
+                    data-action="action"
                 >
-                    View Portfolio
+                    Sell
                 </button>
             </td>
         </tr>
