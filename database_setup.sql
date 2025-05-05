@@ -65,6 +65,9 @@ CREATE TABLE if not exists transactions (
     FOREIGN KEY (security_id) REFERENCES securities(security_id) ON DELETE CASCADE
 );
 
+-- Add index for transaction_date to optimize date-based queries
+CREATE INDEX idx_transaction_date ON transactions(transaction_date);
+
 -- Watchlist Table
 CREATE TABLE if not exists watchlist (
     watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
