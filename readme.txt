@@ -26,6 +26,10 @@ Implemented Portfolio, PortfolioHolding, and Transaction and their corresponding
 Implemented PortfolioAnalyticsService.java, which contains the logic for the portfolio analytics queries. 
 
 
+Test users: 
+user1 pass 
+user2 pass 
+user3 pass
 
 Technology
 Springboot
