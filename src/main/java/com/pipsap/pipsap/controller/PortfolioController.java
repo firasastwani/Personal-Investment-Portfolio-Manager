@@ -1,6 +1,7 @@
 package com.pipsap.pipsap.controller;
 
 import com.pipsap.pipsap.model.Portfolio;
+import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,12 @@ public class PortfolioController {
         List<Portfolio> portfolios = portfolioService.getAllPortfolios();
         return ResponseEntity.ok(portfolios);
     }
+
+    @GetMapping("/{id}/holdings")
+    public ResponseEntity<List<PortfolioHolding>> getPortfolioHoldings(@PathVariable Integer id) {
+        List<PortfolioHolding> holdings = portfolioService.getPortfolioHoldings(id);
+        return ResponseEntity.ok(holdings);
+    }   
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPortfolio(@PathVariable Integer id) {

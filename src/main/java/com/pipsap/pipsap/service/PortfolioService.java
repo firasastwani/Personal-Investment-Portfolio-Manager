@@ -2,7 +2,9 @@ package com.pipsap.pipsap.service;
 
 import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.model.User;
+import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.repository.PortfolioRepository;
+import com.pipsap.pipsap.repository.PortfolioHoldingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ import java.util.Optional;
 public class PortfolioService {
     @Autowired
     private PortfolioRepository portfolioRepository;
+
+    @Autowired
+    private PortfolioHoldingRepository portfolioHoldingRepository;
 
     public Portfolio createPortfolio(Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
@@ -30,6 +35,8 @@ public class PortfolioService {
         return portfolioRepository.findByUser_UserId(userId);
     }
 
+    
+
     public Portfolio updatePortfolio(Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
     }
@@ -40,5 +47,9 @@ public class PortfolioService {
 
     public List<Portfolio> getAllPortfolios() {
         return portfolioRepository.findAll();
+    }
+
+    public List<PortfolioHolding> getPortfolioHoldings(Integer portfolioId) {
+        return portfolioHoldingRepository.findByPortfolio_PortfolioId(portfolioId);
     }
 } 
