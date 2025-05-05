@@ -11,8 +11,7 @@ Wayne Lam
 Firas Astwani 
 prelim.pdf
 Set up database and table schemas
-Found 1000 rows of security data online in a csv file
-Parsed csv file and made SQL insert statements for securities table using python scripts in a seperate file. 
+Found 1000 rows of security data online in a csv file and parsed it using python scripts in a seperate file. (see datasource.txt)
 Created project with spring initializer and set up initial file structure for backend
 Set up authentication and authorization for user registration and login
 Implemented Portfolio, PortfolioHolding, and Transaction and their corresponding controllers, services, models, and repositories, which contains the logic for the portfolio management queries. 
