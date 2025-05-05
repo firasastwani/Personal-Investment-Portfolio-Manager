@@ -5,7 +5,7 @@ import PortfolioList from "@/components/PortfolioList"
 import { useAuth } from "../../AuthContext/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 interface portfolioData {
     id: number;
@@ -20,8 +20,12 @@ export default function PortfolioPage() {
     const router = useRouter();
     const [stocks, setStocks] = useState<portfolioData[]>([]);
     const [fetching, setFetching] = useState(true);
+
     const params = useParams();
     const id = params.id as string;
+
+    const searchParams = useSearchParams();
+    const name = searchParams.get("name") as string;
 
     const handleOnClick = () => {
         console.log("Add stock button clicked")
@@ -97,7 +101,7 @@ export default function PortfolioPage() {
             <div className="flex-grow justify-center pt-4 px-20">
                 <div className="bg-white p-6 rounded shadow-md w-full text-center">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold mb-4">Portfolio</h2>
+                        <h2 className="text-2xl font-bold mb-4">Portfolio: {name}</h2>
                         <button onClick={handleOnClick} className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
                             Buy Stock
                         </button>
