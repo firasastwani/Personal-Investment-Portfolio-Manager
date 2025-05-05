@@ -67,6 +67,19 @@ export default function Dashboard() {
 
     const handleRemove = (id: number) => {
         console.log(`Removing portfolio with id: ${id}`);
+        try {
+            const response = fetch(`http://localhost:8080/api/portfolios/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error("Error removing portfolio:", error);
+        } finally {
+            setPortfolios((prevPortfolios) => prevPortfolios.filter((portfolio) => portfolio.portfolioId !== id));
+        }
         // Add logic here to remove the portfolio if necessary
     };
 
