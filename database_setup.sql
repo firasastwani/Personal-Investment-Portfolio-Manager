@@ -44,6 +44,7 @@ CREATE TABLE if not exists portfolio_holdings (
     security_id INT NOT NULL,
     quantity INT NOT NULL,
     average_purchase_price DECIMAL(10,2) NOT NULL,
+    current_value DECIMAL(10,2) NOT NULL,
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (portfolio_id) REFERENCES portfolios(portfolio_id) ON DELETE CASCADE,
     FOREIGN KEY (security_id) REFERENCES securities(security_id) ON DELETE CASCADE,

@@ -26,6 +26,9 @@ public class PortfolioHolding {
     @Column(name = "average_purchase_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal averagePurchasePrice;
 
+    @Column(name = "current_value", nullable = false, precision = 10, scale = 2)
+    private BigDecimal currentValue;
+
     @Column(name = "last_updated", nullable = false, updatable = false)
     private LocalDateTime lastUpdated;
 
@@ -73,6 +76,14 @@ public class PortfolioHolding {
 
     public void setAveragePurchasePrice(BigDecimal averagePurchasePrice) {
         this.averagePurchasePrice = averagePurchasePrice;
+    }
+
+    public BigDecimal getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(BigDecimal currentValue) {
+        this.currentValue = currentValue;
     }
 
     public LocalDateTime getLastUpdated() {

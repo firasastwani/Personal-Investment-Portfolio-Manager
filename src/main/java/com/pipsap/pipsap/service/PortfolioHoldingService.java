@@ -48,6 +48,8 @@ public class PortfolioHoldingService {
         holding.setSecurity(security);
         holding.setQuantity(quantity);
         holding.setAveragePurchasePrice(security.getStaticPrice());
+        holding.setCurrentValue(security.getStaticPrice().multiply(new BigDecimal(quantity)));
+        holding.setLastUpdated(LocalDateTime.now());
 
         return portfolioHoldingRepository.save(holding);
     }
@@ -74,12 +76,14 @@ public class PortfolioHoldingService {
     }
 
     @Transactional
-    public PortfolioHolding updateHolding(Integer id, Integer quantity, BigDecimal averagePurchasePrice) {
+    public PortfolioHolding updateHolding(Integer id, Integer quantity, BigDecimal securityPrice) {
         PortfolioHolding holding = portfolioHoldingRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Holding not found"));
 
         holding.setQuantity(quantity);
-        holding.setAveragePurchasePrice(averagePurchasePrice);
+        holding.setAveragePurchasePrice(securityPrice);
+        holding.setCurrentValue(securityPrice.multiply(new BigDecimal(quantity)));
+        holding.setLastUpdated(LocalDateTime.now());
 
         return portfolioHoldingRepository.save(holding);
     }
@@ -90,5 +94,9 @@ public class PortfolioHoldingService {
             return false;
         }
         return portfolioHoldingRepository.existsByPortfolioAndSecurity(portfolio, security.get());
+    }
+
+    public Optional<PortfolioHolding> getHoldingByPortfolioAndSecurity(Portfolio portfolio, Security security) {
+        return portfolioHoldingRepository.findByPortfolioAndSecurity(portfolio, security);
     }
 } 
