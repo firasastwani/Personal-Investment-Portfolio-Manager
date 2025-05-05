@@ -25,6 +25,8 @@ Set up authentication and authorization for user registration and login
 Implemented Portfolio, PortfolioHolding, and Transaction and their corresponding controllers, services, models, and repositories, which contains the logic for the portfolio management queries. 
 Implemented PortfolioAnalyticsService.java, which contains the logic for the portfolio analytics queries. 
 
+Demo Video Link: https://www.loom.com/share/a7df043c4f5b4e4899d9043d53d95237
+
 
 Test users: 
 user1 pass 
