@@ -2,6 +2,13 @@ import React, { useState } from "react";
 import StockList from "../../src/components/StockList";
 import StockListIndividual from "../../src/components/StockList.individual";
 
+interface Stock {
+    id: number;
+    symbol: string;
+    name: string;
+    staticPrice: number;
+  }
+
 const PerformanceTest: React.FC = () => {
   const [stocks] = useState<Stock[]>();
   

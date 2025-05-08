@@ -27,18 +27,6 @@ const StockList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
         }
     }, []);
 
-    const handleAddToWatchList = (symbol: string) => {
-        console.log(`Adding ${symbol} to watchlist`);
-        try {
-            const response = fetch(`http://localhost:8080/api/watchlist/${symbol}`, {
-                method: "POST",
-                credentials: "include",
-            });
-        } catch (error) {
-            console.error("Error adding to watchlist:", error);
-        }
-    }
-
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200"
