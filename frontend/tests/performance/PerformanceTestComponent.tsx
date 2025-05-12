@@ -84,3 +84,5 @@ const PerformanceTest: React.FC = () => {
     </div>
   );
 };
+
+export default PerformanceTest;
