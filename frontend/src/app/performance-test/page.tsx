@@ -1,86 +1,193 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
-
-// Use dynamic imports to prevent SSR issues
-const StockList = dynamic(() => import('../../components/StockList'), { ssr: false });
-const StockListIndividual = dynamic(() => import('../../components/StockList.individual'), { ssr: false });
+import React, { useState, useEffect, useRef } from "react";
+import StockList from "../../../src/components/StockList";
+import StockListIndividual from "../../../src/components/StockList.individual";
 
 interface Stock {
-  id: number;
-  symbol: string;
-  name: string;
-  staticPrice: number;
+    id: number;
+    symbol: string;
+    name: string;
+    staticPrice: number;
 }
 
-export default function PerformanceTestPage() {
-  const [testRunning, setTestRunning] = useState(false);
-  const [results, setResults] = useState<{
-    individual?: { renderTime: number };
-    delegation?: { renderTime: number };
-  }>({});
+interface RenderMeasurement {
+    id: string;
+    phase: 'mount' | 'update';
+    duration: number;
+    timestamp: number;
+}
 
-  const stocks = Array.from({ length: 10000 }, (_, i) => ({
-    id: i,
-    symbol: `STK${i}`,
-    name: `Company ${i}`,
-    staticPrice: Math.random() * 10000
-  }));
+const PerformanceTest: React.FC = () => {
+    const [stocks, setStocks] = useState<Stock[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [measurements, setMeasurements] = useState<RenderMeasurement[]>([]);
+    const testCountRef = useRef(0);
+    const renderStartTimeRef = useRef<{[key: string]: number}>({});
 
-  const runPerformanceTest = useCallback(() => {
-    setTestRunning(true);
-    
-    // Test Individual Handlers
-    const individualStart = performance.now();
-    const individualMarkup = <StockListIndividual stocks={stocks} handleAction={() => {}} />;
-    const individualEnd = performance.now();
+    const startMeasurement = (componentId: string) => {
+        // Clear previous measurements
+        performance.clearMarks(`${componentId}-render-start`);
+        performance.clearMarks(`${componentId}-render-end`);
+        performance.clearMeasures(`${componentId}-render-duration`);
+        
+        // Set start time
+        renderStartTimeRef.current[componentId] = performance.now();
+        performance.mark(`${componentId}-render-start`);
+    };
 
-    // Test Event Delegation
-    const delegationStart = performance.now();
-    const delegationMarkup = <StockList stocks={stocks} handleAction={() => {}} />;
-    const delegationEnd = performance.now();
+    const endMeasurement = (componentId: string, phase: 'mount' | 'update') => {
+        if (!renderStartTimeRef.current[componentId]) return;
 
-    setResults({
-      individual: { renderTime: individualEnd - individualStart },
-      delegation: { renderTime: delegationEnd - delegationStart }
-    });
+        performance.mark(`${componentId}-render-end`);
+        performance.measure(
+            `${componentId}-render-duration`,
+            `${componentId}-render-start`,
+            `${componentId}-render-end`
+        );
 
-    setTestRunning(false);
-  }, [stocks]);
+        const measures = performance.getEntriesByName(`${componentId}-render-duration`);
+        const lastMeasure = measures[measures.length - 1];
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Performance Test</h1>
-      
-      <button
-        onClick={runPerformanceTest}
-        disabled={testRunning}
-        className={`px-4 py-2 rounded text-white ${
-          testRunning ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {testRunning ? 'Testing...' : 'Run Performance Test'}
-      </button>
+        if (lastMeasure) {
+            const newMeasurement: RenderMeasurement = {
+                id: componentId,
+                phase,
+                duration: lastMeasure.duration,
+                timestamp: Date.now()
+            };
+            setMeasurements(prev => [...prev, newMeasurement]);
+        }
+    };
 
-      {results.individual && results.delegation && (
-        <div className="mt-8 grid grid-cols-2 gap-4">
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="font-medium">Individual Handlers</h3>
-            <p>Render Time: {results.individual.renderTime.toFixed(5)}ms</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="font-medium">Event Delegation</h3>
-            <p>Render Time: {results.delegation.renderTime.toFixed(5)}ms</p>
-            <p className="text-green-600 font-medium">
-              Improvement: {(
-                ((results.individual.renderTime - results.delegation.renderTime) / 
-                 results.individual.renderTime) * 100
-              ).toFixed(2)}%
-            </p>
-          </div>
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch("http://localhost:8080/api/securities", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const data = await response.json();
+                setStocks(data);
+            } catch (error) {
+                console.error("Error fetching stocks:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleAction = (symbol: string) => {
+        console.log(`Action for ${symbol}`);
+        testCountRef.current += 1;
+        // Force re-render to test update performance
+        setStocks(prev => [...prev]);
+    };
+
+    const getAverageDuration = (componentId: string) => {
+        const componentMeasures = measurements.filter(m => m.id === componentId);
+        if (componentMeasures.length === 0) return 0;
+        return componentMeasures.reduce((sum, m) => sum + m.duration, 0) / componentMeasures.length;
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <div className="p-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6">Performance Test</h1>
+            
+            <div className="mb-8 bg-gray-100 p-4 rounded">
+                <h2 className="text-xl font-bold mb-4">Test Results</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 className="font-semibold mb-2">StockListIndividual</h3>
+                        <p>Renders: {measurements.filter(m => m.id === 'StockListIndividual').length}</p>
+                        <p>Avg: {getAverageDuration('StockListIndividual').toFixed(2)}ms</p>
+                    </div>
+                    <div>
+                        <h3 className="font-semibold mb-2">StockList</h3>
+                        <p>Renders: {measurements.filter(m => m.id === 'StockList').length}</p>
+                        <p>Avg: {getAverageDuration('StockList').toFixed(2)}ms</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mb-8">
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-bold">Individual Handlers</h2>
+                    <button 
+                        onClick={() => startMeasurement('StockListIndividual')}
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                        Start Test
+                    </button>
+                </div>
+                <div 
+                    ref={() => {
+                        if (renderStartTimeRef.current['StockListIndividual']) {
+                            endMeasurement('StockListIndividual', 'update');
+                        }
+                    }}
+                >
+                    <StockListIndividual stocks={stocks} handleAction={handleAction} />
+                </div>
+            </div>
+            
+            <div>
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-bold">Event Delegation</h2>
+                    <button 
+                        onClick={() => startMeasurement('StockList')}
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                        Start Test
+                    </button>
+                </div>
+                <div 
+                    ref={() => {
+                        if (renderStartTimeRef.current['StockList']) {
+                            endMeasurement('StockList', 'update');
+                        }
+                    }}
+                >
+                    <StockList stocks={stocks} handleAction={handleAction} />
+                </div>
+            </div>
+
+            <div className="mt-8 bg-gray-100 p-4 rounded">
+                <h2 className="text-xl font-bold mb-2">Raw Measurements</h2>
+                <div className="max-h-60 overflow-y-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr>
+                                <th className="text-left">Component</th>
+                                <th className="text-left">Phase</th>
+                                <th className="text-left">Duration (ms)</th>
+                                <th className="text-left">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {measurements.map((m, i) => (
+                                <tr key={i} className="border-t">
+                                    <td>{m.id}</td>
+                                    <td>{m.phase}</td>
+                                    <td>{m.duration.toFixed(2)}</td>
+                                    <td>{new Date(m.timestamp).toLocaleTimeString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      )}
-    </div>
-  );
-}
+    );
+};
+
+export default PerformanceTest;
