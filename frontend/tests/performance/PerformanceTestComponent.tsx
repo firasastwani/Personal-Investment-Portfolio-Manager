@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Profiler, ProfilerOnRenderCallback } from "react";
 import StockList from "../../src/components/StockList";
 import StockListIndividual from "../../src/components/StockList.individual";
 
@@ -7,11 +7,33 @@ interface Stock {
     symbol: string;
     name: string;
     staticPrice: number;
-  }
+}
+
+type SchedulerInteraction = {
+    id: number;
+    name: string;
+    timestamp: number;
+};
 
 const PerformanceTest: React.FC = () => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const onRenderCallback: ProfilerOnRenderCallback = (
+    id: string,
+    phase: 'mount' | 'update',
+    actualDuration: number,
+    baseDuration: number,
+    startTime: number,
+    commitTime: number,
+    interactions: Set<SchedulerInteraction>,
+    ...args: any[]
+  ) => {
+    console.log(`${id} ${phase} took ${actualDuration}ms`);
+    interactions.forEach(interaction => {
+      console.log(`Interaction: ${interaction.name}`);
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,13 +70,19 @@ const PerformanceTest: React.FC = () => {
     <div>
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-2">Individual Handlers</h2>
-        <StockListIndividual stocks={stocks} handleAction={handleAction} />
+        <Profiler id="StockListIndividual" onRender={onRenderCallback}>
+          <StockListIndividual stocks={stocks} handleAction={handleAction} />
+        </Profiler>
       </div>
       
       <div>
         <h2 className="text-xl font-bold mb-2">Event Delegation</h2>
-        <StockList stocks={stocks} handleAction={handleAction} />
+        <Profiler id="StockList" onRender={onRenderCallback}>
+          <StockList stocks={stocks} handleAction={handleAction} />
+        </Profiler>
       </div>
     </div>
   );
 };
+
+export default PerformanceTest;
