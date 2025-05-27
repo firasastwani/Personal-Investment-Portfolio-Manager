@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useAuth } from "@/app/AuthContext/AuthContext";
 
 const tabs = [
     { label: "Dashboard", href: "/dashboard" },
@@ -13,20 +14,7 @@ const tabs = [
 
 export default function TabBar() {
     const pathname = usePathname();
-
-    const handleLogout = async () => {
-        try {
-            const response = await fetch("http://localhost:8080/api/auth/logout", {
-                method: "POST",
-                credentials: "include",
-            });
-            console.log("Logout response:", response);
-            window.location.href = "/login";
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
-
+    const { logout } = useAuth();
 
     return (
         <nav className="bg-white shadow sticky top-0 z-50">
@@ -47,7 +35,7 @@ export default function TabBar() {
                         </Link>
                     ))}
                     <button
-                        onClick={handleLogout}
+                        onClick={logout}
                         className="px-4 py-2 rounded font-medium text-gray-700 hover:bg-red-200"
                     >
                         Logout

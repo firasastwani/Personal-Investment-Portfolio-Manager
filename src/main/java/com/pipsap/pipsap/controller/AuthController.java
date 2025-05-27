@@ -1,8 +1,13 @@
 package com.pipsap.pipsap.controller;
 
+import com.pipsap.pipsap.security.JwtTokenProvider;
 import com.pipsap.pipsap.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -11,14 +16,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
-
 public class AuthController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
 
     @Autowired
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/register")
@@ -68,30 +76,55 @@ public class AuthController {
         String password = credentials.get("password");
 
         try {
-            boolean isAuthenticated = userService.authenticate(username, password);
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+            String refreshToken = tokenProvider.generateRefreshToken(username);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Login successful");
+            response.put("token", jwt);
+            response.put("refreshToken", refreshToken);
+            response.put("user", userService.getUserByUsername(username));
             
-            if (isAuthenticated) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("message", "Login successful");
-                return ResponseEntity.ok(response);
-            } else {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Invalid username or password");
-                return ResponseEntity.badRequest().body(response);
-            }
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", "Authentication failed. Please try again.");
-            return ResponseEntity.internalServerError().body(response);
+            response.put("message", "Invalid username or password");
+            return ResponseEntity.badRequest().body(response);
         }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> refreshRequest) {
+        String refreshToken = refreshRequest.get("refreshToken");
+
+        if (tokenProvider.validateToken(refreshToken)) {
+            String username = tokenProvider.getUsernameFromToken(refreshToken);
+            String newToken = tokenProvider.generateToken(
+                new UsernamePasswordAuthenticationToken(username, null)
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("token", newToken);
+            return ResponseEntity.ok(response);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "Invalid refresh token");
+        return ResponseEntity.badRequest().body(response);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        userService.unAuthenticate();
+        SecurityContextHolder.clearContext();
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Logged out successfully");
@@ -100,12 +133,16 @@ public class AuthController {
 
     @GetMapping("/check")
     public ResponseEntity<?> checkAuth() {
-        boolean isAuthenticated = userService.isAuthenticated();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> response = new HashMap<>();
-        response.put("authenticated", isAuthenticated);
-        if (isAuthenticated) {
-            response.put("user", userService.getLoggedInUser());
+        
+        if (authentication != null && authentication.isAuthenticated()) {
+            response.put("authenticated", true);
+            response.put("user", userService.getUserByUsername(authentication.getName()));
+        } else {
+            response.put("authenticated", false);
         }
+        
         return ResponseEntity.ok(response);
     }
 } 

@@ -2,6 +2,10 @@ package com.pipsap.pipsap.service;
 
 import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,9 +14,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.Optional;
@@ -20,19 +22,21 @@ import java.util.Optional;
 @Service
 @SessionScope
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private final DataSource dataSource;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private User loggedInUser = null; 
 
     @Autowired
-    public UserService(DataSource dataSource) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, DataSource dataSource) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.dataSource = dataSource;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.bCryptPasswordEncoder = new BCryptPasswordEncoder();
     }
 
     public boolean authenticate(String username, String password) {
@@ -45,7 +49,7 @@ public class UserService {
             
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
-                if (passwordEncoder.matches(password, storedPassword)) {
+                if (bCryptPasswordEncoder.matches(password, storedPassword)) {
                     loggedInUser = new User();
                     loggedInUser.setUserId(rs.getInt("user_id"));
                     loggedInUser.setUsername(rs.getString("username"));
@@ -76,44 +80,24 @@ public class UserService {
         return loggedInUser;
     }
 
+    @Transactional
     public boolean registerUser(String username, String password) {
-        final String sql = "Insert into users (username, password) values (?, ?)";
-
-        try (Connection conn = dataSource.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            stmt.setString(2, passwordEncoder.encode(password));
-
-            int rowsEffected = stmt.executeUpdate();
-
-            return rowsEffected > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error registering user", e);
+        if (userRepository.findByUsername(username).isPresent()) {
+            return false;
         }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole("ROLE_USER");
+
+        userRepository.save(user);
+        return true;
     }
 
     public User getUserByUsername(String username) {
-
-        final String sql = "Select * from users where username = ?";
-        User user = null; 
-
-        try (Connection conn = dataSource.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error getting user by username", e);
-        }
-
-        return user;
+        return userRepository.findByUsername(username)
+                .orElse(null);
     }
 
     //Get user id from username
@@ -137,7 +121,5 @@ public class UserService {
     
         return userId;
     }
-    
-
     
 } 
