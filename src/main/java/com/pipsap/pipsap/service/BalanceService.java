@@ -22,7 +22,10 @@ public class BalanceService {
         return user.getBalance();
     }
     
+
+    // administrative purposes only, not used in frontend
     public void updateBalance(Integer id, Long newBalance) {
+
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
         user.setBalance(newBalance);
@@ -30,15 +33,31 @@ public class BalanceService {
     }
 
     public void addBalance(Integer id, Long amount) {
+
+        //check if amount is positive
+        if (amount <= 0) {
+            throw new RuntimeException("Amount must be positive");
+        }
+    
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
         user.setBalance(user.getBalance() + amount);
         userRepository.save(user);
     }
 
-    public void subtractBalance(Integer id, Long amount) {  
+    public void subtractBalance(Integer id, Long amount) { 
+
+        //check if amount is positive
+        if (amount <= 0) {
+            throw new RuntimeException("Amount must be positive");
+        }
+        //check if user has enough balance
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getBalance() < amount) {
+            throw new RuntimeException("User does not have enough balance");
+        }   
+        //update balance
         user.setBalance(user.getBalance() - amount);
         userRepository.save(user);
     }
