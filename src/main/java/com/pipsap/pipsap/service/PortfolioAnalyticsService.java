@@ -3,6 +3,7 @@ package com.pipsap.pipsap.service;
 import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.model.Transaction;
+import com.pipsap.pipsap.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,9 @@ public class PortfolioAnalyticsService {
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private PortfolioService portfolioService;
 
     /**
      * Get portfolio diversification by sector
@@ -202,5 +206,26 @@ public class PortfolioAnalyticsService {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    /**
+     * Get total account value (TAV) for a user
+     * TAV = User's balance + Sum of all portfolio values
+     * @param user The user to calculate TAV for
+     * @return Total account value
+     */
+    public double getTotalAccountValue(User user) {
+        // Get user's balance
+        double balance = user.getBalance();
+        
+        // Get all user's portfolios
+        List<Portfolio> portfolios = portfolioService.getPortfoliosByUser(user);
+        
+        // Sum up all portfolio values
+        double totalPortfolioValue = portfolios.stream()
+            .mapToDouble(portfolio -> getTotalValueOfHoldings(portfolio.getPortfolioId()))
+            .sum();
+            
+        return balance + totalPortfolioValue;
     }
 } 

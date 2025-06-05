@@ -104,4 +104,14 @@ public class PortfolioAnalyticsController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/total-account-value")
+    public ResponseEntity<Double> getTotalAccountValue() {
+        try {
+            User currentUser = getCurrentUser();
+            return ResponseEntity.ok(portfolioAnalyticsService.getTotalAccountValue(currentUser));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 } 
