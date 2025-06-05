@@ -2,6 +2,7 @@ package com.pipsap.pipsap.controller;
 
 import com.pipsap.pipsap.security.JwtTokenProvider;
 import com.pipsap.pipsap.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -108,21 +109,35 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> refreshRequest) {
         String refreshToken = refreshRequest.get("refreshToken");
 
-        if (tokenProvider.validateToken(refreshToken)) {
-            String username = tokenProvider.getUsernameFromToken(refreshToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-            
-            String newToken = tokenProvider.generateToken(authentication);
-            String newRefreshToken = tokenProvider.generateRefreshToken(username);
-
+        if (refreshToken == null || refreshToken.isEmpty()) {
             Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("token", newToken);
-            response.put("refreshToken", newRefreshToken);
-            return ResponseEntity.ok(response);
+            response.put("success", false);
+            response.put("message", "Refresh token is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            if (tokenProvider.validateRefreshToken(refreshToken)) {
+                String username = tokenProvider.getUsernameFromToken(refreshToken);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+                
+                String newToken = tokenProvider.generateToken(authentication);
+                String newRefreshToken = tokenProvider.generateRefreshToken(username);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("token", newToken);
+                response.put("refreshToken", newRefreshToken);
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Invalid refresh token");
+            return ResponseEntity.badRequest().body(response);
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -132,7 +147,18 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        try {
+            String token = tokenProvider.getJwtFromRequest(request);
+            if (token != null) {
+                // Invalidate the token (you might want to add token to a blacklist)
+                tokenProvider.invalidateToken(token);
+            }
+        } catch (Exception e) {
+            // Log the error but still proceed with logout
+            System.err.println("Error during token invalidation: " + e.getMessage());
+        }
+
         SecurityContextHolder.clearContext();
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -141,17 +167,29 @@ public class AuthController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<?> checkAuth() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> checkAuth(HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
-        if (authentication != null && authentication.isAuthenticated()) {
-            response.put("authenticated", true);
-            response.put("user", userService.getUserByUsername(authentication.getName()));
-        } else {
-            response.put("authenticated", false);
+        try {
+            String token = tokenProvider.getJwtFromRequest(request);
+            if (token != null && tokenProvider.validateToken(token)) {
+                String username = tokenProvider.getUsernameFromToken(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                response.put("authenticated", true);
+                response.put("user", userService.getUserByUsername(username));
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            // Log the error but don't expose it to the client
+            System.err.println("Error during auth check: " + e.getMessage());
         }
         
+        response.put("authenticated", false);
         return ResponseEntity.ok(response);
     }
 } 
