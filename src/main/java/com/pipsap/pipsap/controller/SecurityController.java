@@ -1,9 +1,12 @@
 package com.pipsap.pipsap.controller;
 
 import com.pipsap.pipsap.model.Security;
+import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.service.SecurityService;
+import com.pipsap.pipsap.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +17,30 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 public class SecurityController {
 
-    @Autowired  
-    private SecurityService securityService;
+    private final SecurityService securityService;
+    private final UserService userService;
+
+    @Autowired
+    public SecurityController(SecurityService securityService, UserService userService) {
+        this.securityService = securityService;
+        this.userService = userService;
+    }
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
+    }
+
+    private void validateAdminAccess() {
+        User user = getCurrentUser();
+        if (!"ROLE_ADMIN".equals(user.getRole())) {
+            throw new RuntimeException("Admin access required");
+        }
+    }
 
     @GetMapping
     public ResponseEntity<List<Security>> getAllSecurities() {
@@ -45,6 +70,7 @@ public class SecurityController {
     @PostMapping
     public ResponseEntity<Security> createSecurity(@RequestBody Security security) {
         try {
+            validateAdminAccess();
             Security created = securityService.createSecurity(security);
             return ResponseEntity.ok(created);
         } catch (Exception e) {
@@ -55,6 +81,7 @@ public class SecurityController {
     @PutMapping("/{id}")
     public ResponseEntity<Security> updateSecurity(@PathVariable Integer id, @RequestBody Security security) {
         try {
+            validateAdminAccess();
             security.setId(id);
             Security updated = securityService.updateSecurity(security);
             return ResponseEntity.ok(updated);
@@ -66,6 +93,7 @@ public class SecurityController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSecurity(@PathVariable Integer id) {
         try {
+            validateAdminAccess();
             securityService.deleteSecurity(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -75,16 +103,22 @@ public class SecurityController {
 
     @GetMapping("/searchByName")
     public ResponseEntity<List<Security>> searchSecuritiesByName(@RequestParam String name) {
-
-        List<Security> securities = securityService.searchSecuritiesByName(name);
-        return ResponseEntity.ok(securities);
+        try {
+            List<Security> securities = securityService.searchSecuritiesByName(name);
+            return ResponseEntity.ok(securities);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/searchBySymbol")
     public ResponseEntity<List<Security>> searchSecuritiesBySymbol(@RequestParam String symbol) {
-        
-        List<Security> securities = securityService.searchSecuritiesBySymbol(symbol);
-        return ResponseEntity.ok(securities);
+        try {
+            List<Security> securities = securityService.searchSecuritiesBySymbol(symbol);
+            return ResponseEntity.ok(securities);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/symbol/{symbol}")

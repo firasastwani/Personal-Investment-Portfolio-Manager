@@ -90,6 +90,7 @@ public class UserService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("ROLE_USER");
+        user.setBalance(0L); // Initialize balance to 0
 
         userRepository.save(user);
         return true;
@@ -100,26 +101,8 @@ public class UserService {
                 .orElse(null);
     }
 
-    //Get user id from username
     public Integer getUserIdByUsername(String username) {
-
-        final String sql = "SELECT user_id FROM users WHERE username = ?";
-        Integer userId = null;
-    
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-    
-            if (rs.next()) {
-                userId = rs.getInt("user_id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error getting user ID by username", e);
-        }
-    
-        return userId;
+        User user = getUserByUsername(username);
+        return user != null ? user.getUserId() : null;
     }
-    
 } 

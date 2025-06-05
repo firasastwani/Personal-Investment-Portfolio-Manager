@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Cookies from 'js-cookie';
 
 type User = {
     userId: number;
@@ -45,26 +46,67 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
-                if (error.response?.status === 401 && !originalRequest._retry) {
+                
+                // If the error is 401 and we haven't tried to refresh the token yet
+                if (error.response?.status === 401 && 
+                    !originalRequest._retry && 
+                    !originalRequest.url?.includes('/api/auth/refresh')) {
+                    
                     originalRequest._retry = true;
                     try {
                         const refreshToken = localStorage.getItem('refreshToken');
-                        if (refreshToken) {
-                            const response = await axios.post('/api/auth/refresh', { refreshToken });
-                            const { token } = response.data;
-                            localStorage.setItem('token', token);
-                            originalRequest.headers.Authorization = `Bearer ${token}`;
-                            return axios(originalRequest);
+                        if (!refreshToken) {
+                            throw new Error('No refresh token available');
                         }
+
+                        const response = await axios.post('/api/auth/refresh', { refreshToken });
+                        const { token, refreshToken: newRefreshToken } = response.data;
+                        
+                        if (!token || !newRefreshToken) {
+                            throw new Error('Invalid token response');
+                        }
+
+                        // Update tokens
+                        localStorage.setItem('token', token);
+                        localStorage.setItem('refreshToken', newRefreshToken);
+                        
+                        // Update the original request's authorization header
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        
+                        // Retry the original request
+                        return axios(originalRequest);
                     } catch (refreshError) {
                         console.error('Token refresh failed:', refreshError);
-                        await logout();
+                        // Clear tokens and redirect to login
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        setUser(null);
+                        router.push('/login');
+                        return Promise.reject(refreshError);
                     }
                 }
                 return Promise.reject(error);
             }
         );
-    }, []);
+    }, [router]);
+
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                await axios.post("/api/auth/logout", {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            setUser(null);
+            router.push("/login");
+        }
+    };
 
     useEffect(() => {
         const path = window.location.pathname;
@@ -76,32 +118,44 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
 
         const fetchUser = async () => {
             try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setUser(null);
+                    setLoading(false);
+                    router.push("/login");
+                    return;
+                }
+
                 const response = await axios.get("/api/auth/check");
                 if (response.data.authenticated) {
-                    console.log("User authenticated:", response.data.user);
                     setUser(response.data.user);
                 } else {
-                    console.log("User not authenticated");
-                    console.log("Response data:", response.data);
-                    router.push("/login");
+                    await handleLogout();
                 }
             } catch (error) {
                 console.error("Error fetching user:", error);
-                setUser(null);
+                await handleLogout();
             } finally {
                 setLoading(false);
             }
         };
     
         fetchUser();
-    }, []);
+    }, [router]);
 
     const login = async (username: string, password: string) => {
         try {
             const response = await axios.post("/api/auth/login", { username, password });
             const { token, refreshToken, user } = response.data;
+            
+            if (!token || !refreshToken) {
+                throw new Error('Invalid response from server');
+            }
+
+            // Store tokens
             localStorage.setItem('token', token);
             localStorage.setItem('refreshToken', refreshToken);
+            
             setUser(user);
             router.push("/dashboard");
         } catch (error) {
@@ -110,18 +164,7 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
         }
     };
 
-    const logout = async () => {
-        try {
-            await axios.post("/api/auth/logout");
-        } catch (error) {
-            console.error("Logout failed:", error);
-        } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            setUser(null);
-            router.push("/login");
-        }
-    };
+    const logout = handleLogout;
 
     const refreshUser = async () => {
         try {
@@ -129,11 +172,11 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
             if (response.data.authenticated) {
                 setUser(response.data.user);
             } else {
-                setUser(null);
+                await handleLogout();
             }
         } catch (error) {
             console.error("Error refreshing user:", error);
-            setUser(null);
+            await handleLogout();
         }
     };
     

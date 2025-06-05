@@ -24,7 +24,10 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     @JsonIgnore
-    private String password;
+   private String password;
+
+    @Column(nullable= false)
+    private long balance;
 
     @Column(nullable = false)
     private String role = "ROLE_USER";
@@ -87,6 +90,14 @@ public class User implements UserDetails {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long balance) {
+        this.balance = balance;
     }
 
 } 

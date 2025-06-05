@@ -7,6 +7,7 @@ import com.pipsap.pipsap.repository.WatchlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -21,20 +22,24 @@ public class WatchlistService {
     @Autowired
     private UserService userService;
 
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
+    }
+
     @Transactional
     public WatchlistItem addToWatchlist(String symbol) {
-        // Get the current user
-        User user = userService.getLoggedInUser();
-        if (user == null) {
-            throw new RuntimeException("User not logged in");
-        }
+        User user = getCurrentUser();
 
         // Get the security
         Security security = securityService.getSecurityBySymbol(symbol)
             .orElseThrow(() -> new RuntimeException("Security not found: " + symbol));
 
         // Check if already in watchlist
-    
         List<WatchlistItem> existingItems = watchlistRepository.findByUserAndSecurity(user, security);
         if (!existingItems.isEmpty()) {
             throw new RuntimeException("Security already in watchlist");
@@ -50,14 +55,19 @@ public class WatchlistService {
 
     @Transactional
     public void removeFromWatchlist(Integer id) {
+        User user = getCurrentUser();
+        WatchlistItem item = watchlistRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Watchlist item not found"));
+            
+        if (!item.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Not authorized to remove this item");
+        }
+        
         watchlistRepository.deleteById(id);
     }
 
     public List<WatchlistItem> getWatchlistByUser() {
-        User user = userService.getLoggedInUser();
-        if (user == null) {
-            throw new RuntimeException("User not logged in");
-        }
+        User user = getCurrentUser();
         return watchlistRepository.findByUser(user);
     }
 

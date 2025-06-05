@@ -5,6 +5,7 @@ import { useAuth } from "../AuthContext/AuthContext";
 import { useRouter } from "next/navigation";
 import WatchList from "@/components/WatchList";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface Stock {
     id: number;
@@ -13,42 +14,36 @@ interface Stock {
     staticPrice: number;
 }
 
-
 export default function Watchlist() {
-    const { user, loading } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
     const router = useRouter();
-    const [stocks, setStocks] = useState([]);
+    const [stocks, setStocks] = useState<Stock[]>([]);
     const [fetching, setFetching] = useState(true);
-
-    type stockData = {
-        id: number;
-        name: string;
-        symbol: string;
-        staticPrice: number;
-    }
+    const [error, setError] = useState<string | null>(null);
 
     const fetchStocks = async () => {
         try {
-            const response = await fetch("http://localhost:8080/api/watchlist", {
-                method: "GET",
-                credentials: "include",
-            });
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            const data = await response.json();
-            
-            const stocksData = data.map((stock: any) => ({
+            setError(null);
+            const response = await axios.get("/api/watchlist");
+            const stocksData = response.data.map((stock: any) => ({
                 id: stock.id,
                 name: stock.security.name,
                 symbol: stock.security.symbol,
                 staticPrice: stock.security.staticPrice,
             }));
-
             setStocks(stocksData);
-            console.log("Fetched stocks:", stocksData);
         } catch (error) {
             console.error("Error fetching stocks:", error);
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    setError("Your session has expired. Please log in again.");
+                    await refreshUser();
+                } else {
+                    setError("Failed to fetch watchlist. Please try again.");
+                }
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
         } finally {
             setFetching(false);
         }
@@ -61,27 +56,34 @@ export default function Watchlist() {
         }
     }, [user]);
 
-    const handleRemove = (id: number) => {
-        console.log(`Removing stock with id: ${id}`);
+    const handleRemove = async (id: number) => {
         try {
-            const response = fetch(`http://localhost:8080/api/watchlist/${id}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
+            setError(null);
+            await axios.delete(`/api/watchlist/${id}`);
+            setStocks((prevStocks) => prevStocks.filter((stock) => stock.id !== id));
         } catch (error) {
             console.error("Error removing stock from watchlist:", error);
-        } finally {
-            setStocks((prevStocks) => prevStocks.filter((stock: stockData) => stock.id !== id));
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    setError("Your session has expired. Please log in again.");
+                    await refreshUser();
+                } else {
+                    setError("Failed to remove stock from watchlist. Please try again.");
+                }
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
         }
     };
-
 
     if (loading || fetching) {
         return <div>Loading...</div>;
     }
+
     if (!user) {
         return <div>Please log in to access the watchlist.</div>;
     }
+
     const handleOnClick = () => {
         router.push("/stocks");
     }
@@ -97,14 +99,16 @@ export default function Watchlist() {
                             Add Stock
                         </button>
                     </div>
+                    {error && (
+                        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
                     {stocks.length > 0 ? (
                         <WatchList stocks={stocks} handleAction={handleRemove} />
                     ) : (
-                            <p className="mb-4">Your watchlist is empty.</p>
-                        )
-                    }
-                    {/* <p className="mb-4">Your watchlist is empty.</p> */}
-                    {/* <StockList stocks={stocks} handleAction={() => { }} /> */}
+                        <p className="mb-4">Your watchlist is empty.</p>
+                    )}
                 </div>
             </div>
         </div>

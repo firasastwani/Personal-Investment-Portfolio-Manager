@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import WatchRow from "./WatchRow";
+import axios from "axios";
 
 interface Stock {
     id: number;
@@ -20,25 +20,11 @@ const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
         if (button) {
             const row = button.closest("tr");
             const id = Number(row?.getAttribute('data-id'));
-            console.log("Id: ", id);
-
             if (id) {
                 handleAction(id);
             }
         }
-    }, []);
-
-    const handleAddToWatchList = (symbol: string) => {
-        console.log(`Adding ${symbol} to watchlist`);
-        try {
-            const response = fetch(`http://localhost:8080/api/watchlist/${symbol}`, {
-                method: "POST",
-                credentials: "include",
-            });
-        } catch (error) {
-            console.error("Error adding to watchlist:", error);
-        }
-    }
+    }, [handleAction]);
 
     return (
         <div className="overflow-x-auto">
@@ -63,16 +49,30 @@ const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {stocks.map((stock) => (
-                        <WatchRow
-                            key={stock.id}
-                            stock={stock}
-                        />
+                        <tr key={stock.id} data-id={stock.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="font-medium">{stock.name}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="font-medium">{stock.symbol}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="font-medium">${stock.staticPrice.toFixed(2)}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <button
+                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                                    data-action="add-to-watchlist"
+                                >
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
                     ))}
                 </tbody>
             </table>
         </div>
-    )
-
-}
+    );
+};
 
 export default WatchList;

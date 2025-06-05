@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 import java.util.Map;
 import java.util.List;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/portfolios")
@@ -26,22 +27,14 @@ public class PortfolioController {
     @PostMapping("/getPortfoliosForUser")
     public ResponseEntity<List<Portfolio>> getPortfoliosByUsername(@RequestBody Map<String, String> request) {
         String username = request.get("username");
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
         System.out.println("Fetching portfolios for username: " + username);
 
-        int userId = userService.getUserIdByUsername(username);
-
-        List<Portfolio> portfolios = portfolioService.getPortfoliosByUserId(userId);
-
-        if (portfolios.isEmpty()) {
+        Integer userId = userService.getUserIdByUsername(username);
+        if (userId == null) {
             return ResponseEntity.notFound().build();
         }
 
+        List<Portfolio> portfolios = portfolioService.getPortfoliosByUserId(userId);
         return ResponseEntity.ok(portfolios);
     }
 
@@ -68,8 +61,22 @@ public class PortfolioController {
 
     @PostMapping
     public ResponseEntity<?> createPortfolio(@RequestBody Portfolio portfolio) {
-        Portfolio createdPortfolio = portfolioService.createPortfolio(portfolio);
-        return ResponseEntity.ok(createdPortfolio);
+        try {
+            // Get the authenticated user from the security context
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+            
+            if (user == null) {
+                return ResponseEntity.status(401).body("User not found");
+            }
+            
+            // Set the user for the portfolio
+            portfolio.setUser(user);
+            Portfolio createdPortfolio = portfolioService.createPortfolio(portfolio);
+            return ResponseEntity.ok(createdPortfolio);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to create portfolio: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")

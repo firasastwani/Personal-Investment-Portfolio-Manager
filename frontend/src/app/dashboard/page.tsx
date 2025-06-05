@@ -5,6 +5,7 @@ import { useAuth } from "../AuthContext/AuthContext";
 import { useRouter } from "next/navigation";
 import PortfolioList from "@/components/PortfolioList";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface Stock {
     id: number;
@@ -21,43 +22,41 @@ interface Portfolio {
 }
 
 export default function Dashboard() {
-    const { user, loading } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
     const router = useRouter();
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [fetching, setFetching] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchPortfolios = async () => {
         if (!user || !user.username) {
             console.error("Username is not available");
-            setFetching(false); // ← important!
+            setFetching(false);
             return;
         }
         try {
-            const response = await fetch("http://localhost:8080/api/portfolios/getPortfoliosForUser", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: user.username }),
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                console.error("Failed to fetch portfolios");
-                setFetching(false); // ← mark fetch done even if failed
-                return;
-            }
-
-            const data = await response.json();
-            setPortfolios(data);
+            const response = await axios.post("/api/portfolios/getPortfoliosForUser", 
+                { username: user.username }
+            );
+            setPortfolios(response.data || []);
+            setError(null);
         } catch (error) {
             console.error("Error fetching portfolios:", error);
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    setError("Your session has expired. Please log in again.");
+                    await refreshUser();
+                } else if (error.response?.status === 404) {
+                    setPortfolios([]);
+                    setError(null);
+                } else {
+                    setError("Failed to fetch portfolios. Please try again.");
+                }
+            }
         } finally {
-            setFetching(false); // ← always stop fetching
+            setFetching(false);
         }
     };
-
-
 
     useEffect(() => {
         if (user) {
@@ -65,33 +64,28 @@ export default function Dashboard() {
         }
     }, [user]);
 
-    const handleRemove = (id: number) => {
-        console.log(`Removing portfolio with id: ${id}`);
+    const handleRemove = async (id: number) => {
         try {
-            const response = fetch(`http://localhost:8080/api/portfolios/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            });
+            await axios.delete(`/api/portfolios/${id}`);
+            setPortfolios(prevPortfolios => 
+                prevPortfolios.filter(portfolio => portfolio.portfolioId !== id)
+            );
         } catch (error) {
             console.error("Error removing portfolio:", error);
-        } finally {
-            setPortfolios((prevPortfolios) => prevPortfolios.filter((portfolio) => portfolio.portfolioId !== id));
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                await refreshUser();
+            }
         }
-        // Add logic here to remove the portfolio if necessary
     };
 
     if (loading) {
         return <div>Loading...</div>;
     }
     if (!user) {
-        return <div>Please log in to access the watchlist.</div>;
+        return <div>Please log in to access the dashboard.</div>;
     }
 
     const handleOnClick = () => {
-        console.log("Adding new portfolio");
         router.push("/portfolio/create");
     };
 
@@ -109,6 +103,11 @@ export default function Dashboard() {
                             Add New Portfolio
                         </button>
                     </div>
+                    {error && (
+                        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
                     {fetching ? (
                         <p>Loading portfolios...</p>
                     ) : portfolios.length > 0 ? (
@@ -127,7 +126,6 @@ export default function Dashboard() {
                                         >
                                             View Portfolio
                                         </button>
-
                                         <button
                                             onClick={() => handleRemove(portfolio.portfolioId)}
                                             className="text-red-500 border border-red-300 rounded py-2 hover:text-red-600"

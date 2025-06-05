@@ -3,11 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import StockList from "../../../src/components/StockList";
 import StockListIndividual from "../../../src/components/StockList.individual";
+import { useAuth } from "../AuthContext/AuthContext";
+import axios from "axios";
 
 interface Stock {
     id: number;
-    symbol: string;
     name: string;
+    symbol: string;
     staticPrice: number;
 }
 
@@ -19,11 +21,18 @@ interface RenderMeasurement {
 }
 
 const PerformanceTest: React.FC = () => {
+    const { user, loading, refreshUser } = useAuth();
     const [stocks, setStocks] = useState<Stock[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [fetching, setFetching] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [measurements, setMeasurements] = useState<RenderMeasurement[]>([]);
     const testCountRef = useRef(0);
     const renderStartTimeRef = useRef<{[key: string]: number}>({});
+    const [performance, setPerformance] = useState<{
+        fetchTime: number;
+        parseTime: number;
+        totalTime: number;
+    } | null>(null);
 
     const startMeasurement = (componentId: string) => {
         // Clear previous measurements
@@ -60,27 +69,46 @@ const PerformanceTest: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch("http://localhost:8080/api/securities", {
-                    method: "GET",
-                    credentials: "include",
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
-                setStocks(data);
-            } catch (error) {
-                console.error("Error fetching stocks:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchStocks = async () => {
+        const startTime = performance.now();
+        try {
+            setError(null);
+            const response = await axios.get("/api/securities");
+            const fetchEndTime = performance.now();
+            const fetchTime = fetchEndTime - startTime;
 
-        fetchData();
-    }, []);
+            const parseStartTime = performance.now();
+            setStocks(response.data);
+            const parseEndTime = performance.now();
+            const parseTime = parseEndTime - parseStartTime;
+
+            setPerformance({
+                fetchTime,
+                parseTime,
+                totalTime: parseEndTime - startTime
+            });
+        } catch (error) {
+            console.error("Error fetching stocks:", error);
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    setError("Your session has expired. Please log in again.");
+                    await refreshUser();
+                } else {
+                    setError("Failed to fetch stocks. Please try again.");
+                }
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
+        } finally {
+            setFetching(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchStocks();
+        }
+    }, [user]);
 
     const handleAction = (symbol: string) => {
         console.log(`Action for ${symbol}`);
@@ -95,14 +123,32 @@ const PerformanceTest: React.FC = () => {
         return componentMeasures.reduce((sum, m) => sum + m.duration, 0) / componentMeasures.length;
     };
 
-    if (loading) {
+    if (loading || fetching) {
         return <div>Loading...</div>;
+    }
+
+    if (!user) {
+        return <div>Please log in to access the performance test.</div>;
     }
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Performance Test</h1>
             
+            {error && (
+                <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+            {performance && (
+                <div className="mb-4 p-4 bg-green-100 text-green-700 rounded">
+                    <h2 className="font-bold mb-2">Performance Metrics:</h2>
+                    <p>Fetch Time: {performance.fetchTime.toFixed(2)}ms</p>
+                    <p>Parse Time: {performance.parseTime.toFixed(2)}ms</p>
+                    <p>Total Time: {performance.totalTime.toFixed(2)}ms</p>
+                </div>
+            )}
+
             <div className="mb-8 bg-gray-100 p-4 rounded">
                 <h2 className="text-xl font-bold mb-4">Test Results</h2>
                 <div className="grid grid-cols-2 gap-4">

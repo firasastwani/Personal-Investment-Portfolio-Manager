@@ -6,12 +6,15 @@ import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.model.Transaction;
 import com.pipsap.pipsap.model.Security;
+import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.service.PortfolioHoldingService;
 import com.pipsap.pipsap.service.PortfolioService;
 import com.pipsap.pipsap.service.TransactionService;
 import com.pipsap.pipsap.service.SecurityService;
+import com.pipsap.pipsap.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -27,16 +30,35 @@ public class PortfolioHoldingController {
     private final PortfolioService portfolioService;
     private final TransactionService transactionService;
     private final SecurityService securityService;
+    private final UserService userService;
 
     @Autowired
     public PortfolioHoldingController(PortfolioHoldingService portfolioHoldingService, 
                                     PortfolioService portfolioService,
                                     TransactionService transactionService,
-                                    SecurityService securityService) {
+                                    SecurityService securityService,
+                                    UserService userService) {
         this.portfolioHoldingService = portfolioHoldingService;
         this.portfolioService = portfolioService;
         this.transactionService = transactionService;
         this.securityService = securityService;
+        this.userService = userService;
+    }
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
+    }
+
+    private void validatePortfolioOwnership(Portfolio portfolio) {
+        User currentUser = getCurrentUser();
+        if (!portfolio.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new RuntimeException("Not authorized to access this portfolio");
+        }
     }
 
     @PostMapping("/buy/{portfolioId}/{symbol}")
@@ -48,6 +70,9 @@ public class PortfolioHoldingController {
             // Get portfolio and security
             Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+            
+            // Validate portfolio ownership
+            validatePortfolioOwnership(portfolio);
             
             Security security = securityService.getSecurityBySymbol(symbol)
                 .orElseThrow(() -> new RuntimeException("Security not found"));
@@ -95,6 +120,9 @@ public class PortfolioHoldingController {
             // Get portfolio and security
             Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+            
+            // Validate portfolio ownership
+            validatePortfolioOwnership(portfolio);
             
             Security security = securityService.getSecurityBySymbol(symbol)
                 .orElseThrow(() -> new RuntimeException("Security not found"));
@@ -145,6 +173,12 @@ public class PortfolioHoldingController {
     @GetMapping("/portfolio/{portfolioId}")
     public ResponseEntity<List<PortfolioHolding>> getHoldingsByPortfolio(@PathVariable Integer portfolioId) {
         try {
+            Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+            
+            // Validate portfolio ownership
+            validatePortfolioOwnership(portfolio);
+            
             List<PortfolioHolding> holdings = portfolioHoldingService.getHoldingsByPortfolioId(portfolioId);
             return ResponseEntity.ok(holdings);
         } catch (Exception e) {
@@ -155,9 +189,15 @@ public class PortfolioHoldingController {
     @GetMapping("/{id}")
     public ResponseEntity<PortfolioHolding> getHoldingById(@PathVariable Integer id) {
         try {
-            return portfolioHoldingService.getHoldingById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            Optional<PortfolioHolding> holding = portfolioHoldingService.getHoldingById(id);
+            if (holding.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Validate portfolio ownership
+            validatePortfolioOwnership(holding.get().getPortfolio());
+            
+            return ResponseEntity.ok(holding.get());
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -166,6 +206,14 @@ public class PortfolioHoldingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHolding(@PathVariable Integer id) {
         try {
+            Optional<PortfolioHolding> holding = portfolioHoldingService.getHoldingById(id);
+            if (holding.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Validate portfolio ownership
+            validatePortfolioOwnership(holding.get().getPortfolio());
+            
             portfolioHoldingService.deleteHolding(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

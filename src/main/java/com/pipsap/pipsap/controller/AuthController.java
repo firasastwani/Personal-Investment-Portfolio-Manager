@@ -8,6 +8,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -21,12 +23,14 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/register")
@@ -106,13 +110,18 @@ public class AuthController {
 
         if (tokenProvider.validateToken(refreshToken)) {
             String username = tokenProvider.getUsernameFromToken(refreshToken);
-            String newToken = tokenProvider.generateToken(
-                new UsernamePasswordAuthenticationToken(username, null)
-            );
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+            
+            String newToken = tokenProvider.generateToken(authentication);
+            String newRefreshToken = tokenProvider.generateRefreshToken(username);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("token", newToken);
+            response.put("refreshToken", newRefreshToken);
             return ResponseEntity.ok(response);
         }
 

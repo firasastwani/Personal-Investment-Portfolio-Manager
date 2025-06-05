@@ -5,12 +5,12 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 
-@Component
+@Service
 public class JwtTokenProvider {
 
     @Value("${app.jwt.secret}")
@@ -53,6 +53,7 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromToken(String token) {
+        
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

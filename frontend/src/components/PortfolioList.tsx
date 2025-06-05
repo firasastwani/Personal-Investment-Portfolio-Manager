@@ -1,32 +1,32 @@
 import React, { useCallback } from "react";
+import axios from "axios";
 import PortfolioRow from "./PortfolioRow";
 
-interface Portfolio {
+interface Stock {
     id: number;
     name: string;
     symbol: string;
-    quantity: number
+    quantity: number;
     staticPrice: number;
 }
 
-interface PortfolioListProps {
-    portfolios: Portfolio[];
+interface StockListProps {
+    portfolios: Stock[];
     handleAction: (symbol: string) => void;
 }
 
-const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction }) => {
+const PortfolioList: React.FC<StockListProps> = ({ portfolios, handleAction }) => {
     const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
-        const button = target.closest("button[data-action='action']");
+        const button = target.closest("button[data-action='sell']");
         if (button) {
             const row = button.closest("tr");
-            const symbol = row?.getAttribute('data-id');
-
+            const symbol = row?.getAttribute('data-symbol');
             if (symbol) {
                 handleAction(symbol);
             }
         }
-    }, []);
+    }, [handleAction]);
 
     const handleAddToWatchList = (symbol: string) => {
         console.log(`Adding ${symbol} to watchlist`);
@@ -74,8 +74,7 @@ const PortfolioList: React.FC<PortfolioListProps > = ({ portfolios, handleAction
                 </tbody>
             </table>
         </div>
-    )
-
-}
+    );
+};
 
 export default PortfolioList;
