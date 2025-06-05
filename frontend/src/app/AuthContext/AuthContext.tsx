@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import axios from "axios";
 import Cookies from 'js-cookie';
 
@@ -25,6 +25,7 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const pathname = usePathname();
 
     const publicRoutes = ["/login", "/register"];
     
@@ -77,11 +78,7 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
                         return axios(originalRequest);
                     } catch (refreshError) {
                         console.error('Token refresh failed:', refreshError);
-                        // Clear tokens and redirect to login
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('refreshToken');
-                        setUser(null);
-                        router.push('/login');
+                        await handleLogout();
                         return Promise.reject(refreshError);
                     }
                 }
@@ -108,24 +105,16 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
         }
     };
 
+    // Handle authentication and redirection
     useEffect(() => {
-        const path = window.location.pathname;
+        const checkAuth = async () => {
+            // Don't check auth for public routes
+            if (publicRoutes.includes(pathname)) {
+                setLoading(false);
+                return;
+            }
 
-        if (publicRoutes.includes(path)) {
-            setLoading(false);
-            return;
-        }
-
-        const fetchUser = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setUser(null);
-                    setLoading(false);
-                    router.push("/login");
-                    return;
-                }
-
                 const response = await axios.get("/api/auth/check");
                 if (response.data.authenticated) {
                     setUser(response.data.user);
@@ -133,15 +122,15 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
                     await handleLogout();
                 }
             } catch (error) {
-                console.error("Error fetching user:", error);
+                console.error("Error checking authentication:", error);
                 await handleLogout();
             } finally {
                 setLoading(false);
             }
         };
-    
-        fetchUser();
-    }, [router]);
+
+        checkAuth();
+    }, [pathname]);
 
     const login = async (username: string, password: string) => {
         try {
@@ -179,6 +168,17 @@ export const AuthProvider = ({ children} : { children: React.ReactNode }) => {
             await handleLogout();
         }
     };
+    
+    // Show loading state while checking authentication
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    // Redirect to login if not authenticated and not on a public route
+    if (!user && !publicRoutes.includes(pathname)) {
+        router.push("/login");
+        return null;
+    }
     
     return (
         <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, refreshUser, login, logout }}>
