@@ -5,7 +5,10 @@ import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.model.Security;
 import com.pipsap.pipsap.repository.PortfolioHoldingRepository;
 import com.pipsap.pipsap.repository.SecurityRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,10 +41,10 @@ public class PortfolioHoldingService {
         System.out.println("PortfolioHoldingService: Starting createHolding with portfolioId: " + portfolioId + ", symbol: " + symbol + ", quantity: " + quantity);
         
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
-            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
         Security security = securityService.getSecurityBySymbol(symbol)
-            .orElseThrow(() -> new RuntimeException("Security not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Security not found"));
 
         PortfolioHolding holding = new PortfolioHolding();
         holding.setPortfolio(portfolio);

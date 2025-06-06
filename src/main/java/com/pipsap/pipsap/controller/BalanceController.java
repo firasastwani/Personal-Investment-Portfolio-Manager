@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pipsap.pipsap.service.UserService;
 import com.pipsap.pipsap.model.User;
 
-import com.pipsap.pipsap.exceptions.GlobalExceptionHandler;
 
 import com.pipsap.pipsap.service.BalanceService;
 
@@ -31,52 +30,28 @@ public class BalanceController {
     @GetMapping("/{id}")
     public ResponseEntity<Long> getBalance(@PathVariable Integer id) {
 
-        Long balance;
-
-        try {
-            balance = balanceService.getBalance(id);
-        } catch (RuntimeException e){
-
-            throw new RuntimeException(e.getMessage());
-        }
-
+        Long balance = balanceService.getBalance(id);
         return ResponseEntity.ok(balance);
     }
     
     @PostMapping("/add")
     public ResponseEntity<Void> addBalance(@RequestParam Integer id, @RequestParam Long amount) {
 
-        try {
-            balanceService.addBalance(id, amount);
-        } catch (RuntimeException e){
-            throw new RuntimeException(e.getMessage());
-        }
-
+        balanceService.addBalance(id, amount);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/subtract")
     public ResponseEntity<Void> subtractBalance(@RequestParam Integer id, @RequestParam Long amount) {
 
-        // if we recieve a runtime exception, return 400 status code
-        try {
-            balanceService.subtractBalance(id, amount); 
-        } catch (RuntimeException e){
-            throw new RuntimeException(e.getMessage());
-        }
-
+       balanceService.subtractBalance(id, amount); 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/update")
     public ResponseEntity<Void> updateBalance(@RequestParam Integer id, @RequestParam Long amount) {
 
-        try {
-            balanceService.updateBalance(id, amount);
-        } catch (RuntimeException e){
-            throw new RuntimeException(e.getMessage());
-        }
-
+        balanceService.updateBalance(id, amount);
         return ResponseEntity.ok().build();
     }
 

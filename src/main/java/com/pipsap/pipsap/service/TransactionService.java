@@ -7,6 +7,8 @@ import com.pipsap.pipsap.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,11 +35,11 @@ public class TransactionService {
             String notes) {
         // Get the portfolio
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
-            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
         // Get the security
         Security security = securityService.getSecurityBySymbol(symbol)
-            .orElseThrow(() -> new RuntimeException("Security not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Security not found"));
 
         // Create new transaction
         Transaction transaction = new Transaction();

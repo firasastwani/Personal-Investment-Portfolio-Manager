@@ -4,7 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.pipsap.pipsap.repository.UserRepository;
 import com.pipsap.pipsap.model.User;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class BalanceService {
@@ -18,7 +19,7 @@ public class BalanceService {
 
     public Long getBalance(Integer id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return user.getBalance();
     }
     
@@ -27,10 +28,10 @@ public class BalanceService {
     public void updateBalance(Integer id, Long newBalance) {
 
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if(user.getRole() != "admin") {
-            throw new RuntimeException("User must be an admin to update balance"); 
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User must be an admin to update balance"); 
         }
 
         user.setBalance(newBalance);
@@ -45,7 +46,7 @@ public class BalanceService {
         }
     
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setBalance(user.getBalance() + amount);
         userRepository.save(user);
     }
@@ -54,13 +55,13 @@ public class BalanceService {
 
         //check if amount is positive
         if (amount <= 0) {
-            throw new RuntimeException("Amount must be positive");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
         }
         //check if user has enough balance
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         if (user.getBalance() < amount) {
-            throw new RuntimeException("User does not have enough balance");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not have enough balance");
         }   
         //update balance
         user.setBalance(user.getBalance() - amount);

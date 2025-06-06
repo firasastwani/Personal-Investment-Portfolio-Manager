@@ -3,6 +3,7 @@ package com.pipsap.pipsap.service;
 import com.pipsap.pipsap.model.User;
 import com.pipsap.pipsap.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.Optional;
@@ -58,7 +60,7 @@ public class UserService {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error authenticating user", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error authenticating user: " + e.getMessage());
         }
 
         return false;

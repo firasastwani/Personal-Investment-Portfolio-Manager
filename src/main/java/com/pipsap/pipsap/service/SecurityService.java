@@ -3,7 +3,9 @@ package com.pipsap.pipsap.service;
 import com.pipsap.pipsap.model.Security;
 import com.pipsap.pipsap.repository.SecurityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -63,7 +65,7 @@ public class SecurityService {
 
     public java.math.BigDecimal getPriceBySymbol(String symbol) {
         Security security = getSecurityBySymbol(symbol)
-            .orElseThrow(() -> new RuntimeException("Security not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Security not found"));
         return security.getStaticPrice();
     }
 
