@@ -30,13 +30,28 @@ public class BalanceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Long> getBalance(@PathVariable Integer id) {
-        Long balance = balanceService.getBalance(id);
+
+        Long balance;
+
+        try {
+            balance = balanceService.getBalance(id);
+        } catch (RuntimeException e){
+
+            throw new RuntimeException(e.getMessage());
+        }
+
         return ResponseEntity.ok(balance);
     }
     
     @PostMapping("/add")
     public ResponseEntity<Void> addBalance(@RequestParam Integer id, @RequestParam Long amount) {
-        balanceService.addBalance(id, amount);
+
+        try {
+            balanceService.addBalance(id, amount);
+        } catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
         return ResponseEntity.ok().build();
     }
 
@@ -55,7 +70,13 @@ public class BalanceController {
 
     @PostMapping("/update")
     public ResponseEntity<Void> updateBalance(@RequestParam Integer id, @RequestParam Long amount) {
-        balanceService.updateBalance(id, amount);
+
+        try {
+            balanceService.updateBalance(id, amount);
+        } catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
         return ResponseEntity.ok().build();
     }
 

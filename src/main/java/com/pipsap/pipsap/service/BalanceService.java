@@ -23,11 +23,16 @@ public class BalanceService {
     }
     
 
-    // administrative purposes only, not used in frontend
+    // administrative purposes only, not used in frontend, must be admin to access
     public void updateBalance(Integer id, Long newBalance) {
 
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if(user.getRole() != "admin") {
+            throw new RuntimeException("User must be an admin to update balance"); 
+        }
+
         user.setBalance(newBalance);
         userRepository.save(user);
     }
