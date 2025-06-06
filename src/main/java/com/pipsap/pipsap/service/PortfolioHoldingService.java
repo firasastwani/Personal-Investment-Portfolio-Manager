@@ -5,6 +5,11 @@ import com.pipsap.pipsap.model.PortfolioHolding;
 import com.pipsap.pipsap.model.Security;
 import com.pipsap.pipsap.repository.PortfolioHoldingRepository;
 import com.pipsap.pipsap.repository.SecurityRepository;
+import com.pipsap.pipsap.model.User;
+import com.pipsap.pipsap.model.Transaction;
+import com.pipsap.pipsap.service.PortfolioService;
+import com.pipsap.pipsap.service.SecurityService;
+import com.pipsap.pipsap.service.TransactionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +40,9 @@ public class PortfolioHoldingService {
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     @Transactional
     public PortfolioHolding createHolding(Integer portfolioId, String symbol, Integer quantity) {
@@ -101,5 +109,114 @@ public class PortfolioHoldingService {
 
     public Optional<PortfolioHolding> getHoldingByPortfolioAndSecurity(Portfolio portfolio, Security security) {
         return portfolioHoldingRepository.findByPortfolioAndSecurity(portfolio, security);
+    }
+
+    public void validatePortfolioOwnership(Portfolio portfolio, User user) {
+        if (!portfolio.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Not authorized to access this portfolio");
+        }
+    }
+
+    public Transaction buySecurity(Integer portfolioId, String symbol, Integer quantity, User user) {
+        // Get portfolio and validate ownership
+        Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        validatePortfolioOwnership(portfolio, user);
+        
+        // Get security
+        Security security = securityService.getSecurityBySymbol(symbol)
+            .orElseThrow(() -> new RuntimeException("Security not found"));
+
+        // Create transaction
+        Transaction transaction = transactionService.createTransaction(
+            portfolioId,
+            symbol,
+            Transaction.TransactionType.BUY,
+            new BigDecimal(quantity),
+            security.getStaticPrice(),
+            "Buy transaction"
+        );
+
+        // Update or create portfolio holding
+        Optional<PortfolioHolding> existingHolding = getHoldingByPortfolioAndSecurity(portfolio, security);
+
+        if (existingHolding.isPresent()) {
+            // Update existing holding
+            PortfolioHolding holding = existingHolding.get();
+            int newQuantity = holding.getQuantity() + quantity;
+            updateHolding(
+                holding.getId(),
+                newQuantity,
+                security.getStaticPrice()
+            );
+        } else {
+            // Create new holding
+            createHolding(portfolioId, symbol, quantity);
+        }
+
+        return transaction;
+    }
+
+    public Transaction sellSecurity(Integer portfolioId, String symbol, Integer quantity, User user) {
+        // Get portfolio and validate ownership
+        Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        validatePortfolioOwnership(portfolio, user);
+        
+        // Get security
+        Security security = securityService.getSecurityBySymbol(symbol)
+            .orElseThrow(() -> new RuntimeException("Security not found"));
+
+        // Check if holding exists and has sufficient quantity
+        Optional<PortfolioHolding> existingHolding = getHoldingByPortfolioAndSecurity(portfolio, security);
+
+        if (existingHolding.isEmpty()) {
+            throw new RuntimeException("No holdings found for this security");
+        }
+
+        PortfolioHolding holding = existingHolding.get();
+        if (holding.getQuantity() < quantity) {
+            throw new RuntimeException("Insufficient quantity to sell");
+        }
+
+        // Create transaction
+        Transaction transaction = transactionService.createTransaction(
+            portfolioId,
+            symbol,
+            Transaction.TransactionType.SELL,
+            new BigDecimal(quantity),
+            security.getStaticPrice(),
+            "Sell transaction"
+        );
+
+        // Update holding quantity
+        int newQuantity = holding.getQuantity() - quantity;
+        if (newQuantity == 0) {
+            // Delete holding if quantity becomes 0
+            deleteHolding(holding.getId());
+        } else {
+            // Update holding with new quantity
+            updateHolding(
+                holding.getId(),
+                newQuantity,
+                security.getStaticPrice()
+            );
+        }
+
+        return transaction;
+    }
+
+    public List<PortfolioHolding> getHoldingsByPortfolioWithValidation(Integer portfolioId, User user) {
+        Portfolio portfolio = portfolioService.getPortfolioById(portfolioId)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        validatePortfolioOwnership(portfolio, user);
+        return getHoldingsByPortfolioId(portfolioId);
+    }
+
+    public PortfolioHolding getHoldingByIdWithValidation(Integer id, User user) {
+        PortfolioHolding holding = getHoldingById(id)
+            .orElseThrow(() -> new RuntimeException("Holding not found"));
+        validatePortfolioOwnership(holding.getPortfolio(), user);
+        return holding;
     }
 } 

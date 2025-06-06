@@ -58,4 +58,33 @@ public class PortfolioService {
     public List<PortfolioHolding> getPortfolioHoldings(Integer portfolioId) {
         return portfolioHoldingRepository.findByPortfolio_PortfolioId(portfolioId);
     }
+
+    public Portfolio createPortfolioForUser(Portfolio portfolio, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        portfolio.setUser(user);
+        return createPortfolio(portfolio);
+    }
+
+    public void validatePortfolioOwnership(Portfolio portfolio, User user) {
+        if (!portfolio.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Not authorized to access this portfolio");
+        }
+    }
+
+    public Portfolio updatePortfolioWithValidation(Portfolio portfolio, User user) {
+        Portfolio existingPortfolio = getPortfolioById(portfolio.getPortfolioId())
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        validatePortfolioOwnership(existingPortfolio, user);
+        return updatePortfolio(portfolio);
+    }
+
+    public void deletePortfolioWithValidation(Integer id, User user) {
+        Portfolio portfolio = getPortfolioById(id)
+            .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+        validatePortfolioOwnership(portfolio, user);
+        deletePortfolio(id);
+    }
 } 

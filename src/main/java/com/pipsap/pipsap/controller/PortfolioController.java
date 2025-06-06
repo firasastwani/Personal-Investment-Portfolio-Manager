@@ -27,32 +27,23 @@ public class PortfolioController {
     @PostMapping("/getPortfoliosForUser")
     public ResponseEntity<List<Portfolio>> getPortfoliosByUsername(@RequestBody Map<String, String> request) {
         String username = request.get("username");
-        System.out.println("Fetching portfolios for username: " + username);
-
         Integer userId = userService.getUserIdByUsername(username);
         if (userId == null) {
             return ResponseEntity.notFound().build();
         }
-
         List<Portfolio> portfolios = portfolioService.getPortfoliosByUserId(userId);
         return ResponseEntity.ok(portfolios);
     }
-
-    
 
     @GetMapping("/{id}/holdings")
     public ResponseEntity<List<PortfolioHolding>> getPortfolioHoldings(@PathVariable Integer id) {
         List<PortfolioHolding> holdings = portfolioService.getPortfolioHoldings(id);
         return ResponseEntity.ok(holdings);
-    }   
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPortfolio(@PathVariable Integer id) {
-
-        System.out.println("PortfolioController: Getting portfolio with id: " + id);
-
         Optional<Portfolio> portfolio = portfolioService.getPortfolioById(id);
-
         if (portfolio.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -62,17 +53,8 @@ public class PortfolioController {
     @PostMapping
     public ResponseEntity<?> createPortfolio(@RequestBody Portfolio portfolio) {
         try {
-            // Get the authenticated user from the security context
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userService.getUserByUsername(username);
-            
-            if (user == null) {
-                return ResponseEntity.status(401).body("User not found");
-            }
-            
-            // Set the user for the portfolio
-            portfolio.setUser(user);
-            Portfolio createdPortfolio = portfolioService.createPortfolio(portfolio);
+            Portfolio createdPortfolio = portfolioService.createPortfolioForUser(portfolio, username);
             return ResponseEntity.ok(createdPortfolio);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create portfolio: " + e.getMessage());
@@ -81,15 +63,25 @@ public class PortfolioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePortfolio(@PathVariable Integer id, @RequestBody Portfolio portfolio) {
-
-        Portfolio updatedPortfolio = portfolioService.updatePortfolio(portfolio);
-        return ResponseEntity.ok(updatedPortfolio);
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+            Portfolio updatedPortfolio = portfolioService.updatePortfolioWithValidation(portfolio, user);
+            return ResponseEntity.ok(updatedPortfolio);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to update portfolio: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePortfolio(@PathVariable Integer id) {
-        
-        portfolioService.deletePortfolio(id);
-        return ResponseEntity.ok().build();
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+            portfolioService.deletePortfolioWithValidation(id, user);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to delete portfolio: " + e.getMessage());
+        }
     }
 } 
