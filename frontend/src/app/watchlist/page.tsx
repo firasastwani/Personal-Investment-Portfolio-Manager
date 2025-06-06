@@ -56,11 +56,11 @@ export default function Watchlist() {
         }
     }, [user]);
 
-    const handleRemove = async (id: number) => {
+    const handleRemove = async (symbol: string) => {
         try {
             setError(null);
-            await axios.delete(`/api/watchlist/${id}`);
-            setStocks((prevStocks) => prevStocks.filter((stock) => stock.id !== id));
+            await axios.delete(`/api/watchlist/${symbol}`);
+            setStocks((prevStocks) => prevStocks.filter((stock) => stock.symbol !== symbol));
         } catch (error) {
             console.error("Error removing stock from watchlist:", error);
             if (axios.isAxiosError(error)) {

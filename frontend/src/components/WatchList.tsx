@@ -10,18 +10,18 @@ interface Stock {
 
 interface StockListProps {
     stocks: Stock[];
-    handleAction: (id: number) => void;
+    handleAction: (symbol: string) => void;
 }
 
 const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
     const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
-        const button = target.closest("button[data-action='add-to-watchlist']");
+        const button = target.closest("button[data-action='remove-from-watchlist']");
         if (button) {
             const row = button.closest("tr");
-            const id = Number(row?.getAttribute('data-id'));
-            if (id) {
-                handleAction(id);
+            const symbol = row?.getAttribute('data-symbol');
+            if (symbol) {
+                handleAction(symbol);
             }
         }
     }, [handleAction]);
@@ -49,7 +49,7 @@ const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {stocks.map((stock) => (
-                        <tr key={stock.id} data-id={stock.id}>
+                        <tr key={stock.id} data-symbol={stock.symbol}>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="font-medium">{stock.name}</div>
                             </td>
@@ -62,7 +62,7 @@ const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                 <button
                                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                                    data-action="add-to-watchlist"
+                                    data-action="remove-from-watchlist"
                                 >
                                     Remove
                                 </button>
