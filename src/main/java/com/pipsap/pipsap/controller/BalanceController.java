@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pipsap.pipsap.service.UserService;
 import com.pipsap.pipsap.model.User;
 
+import com.pipsap.pipsap.exceptions.GlobalExceptionHandler;
+
 import com.pipsap.pipsap.service.BalanceService;
 
 @RestController
@@ -40,7 +42,14 @@ public class BalanceController {
 
     @PostMapping("/subtract")
     public ResponseEntity<Void> subtractBalance(@RequestParam Integer id, @RequestParam Long amount) {
-        balanceService.subtractBalance(id, amount);
+
+        // if we recieve a runtime exception, return 400 status code
+        try {
+            balanceService.subtractBalance(id, amount); 
+        } catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
+
         return ResponseEntity.ok().build();
     }
 
