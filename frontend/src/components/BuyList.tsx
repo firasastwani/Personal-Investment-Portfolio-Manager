@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import BuyRow from "./BuyRow";
+import { useBalance } from '@/app/context/BalanceContext';
 
 interface Stock {
     id: number;
@@ -16,11 +17,13 @@ interface SuccessMessage {
 
 interface StockListProps {
     stocks: Stock[];
-    handleAction: (symbol: string) => void;
-    successMessages: SuccessMessage[];
+    handleAction: (symbol: string, quantity: number) => Promise<void>;
+    successMessages: { symbol: string; message: string }[];
 }
 
 const BuyList: React.FC<StockListProps> = ({ stocks, handleAction, successMessages }) => {
+    const { refreshBalances } = useBalance();
+
     const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
         const button = target.closest("button[data-action='buy-stock']");
@@ -29,7 +32,7 @@ const BuyList: React.FC<StockListProps> = ({ stocks, handleAction, successMessag
             const symbol = row?.getAttribute('data-symbol');
 
             if (symbol) {
-                handleAction(symbol);
+                handleAction(symbol, 0);
             }
         }
     }, [handleAction]);
@@ -45,6 +48,11 @@ const BuyList: React.FC<StockListProps> = ({ stocks, handleAction, successMessag
             console.error("Error adding to watchlist:", error);
         }
     }
+
+    const handleBuy = async (symbol: string, quantity: number) => {
+        await handleAction(symbol, quantity);
+        await refreshBalances();
+    };
 
     return (
         <div className="overflow-x-auto">
@@ -70,7 +78,10 @@ const BuyList: React.FC<StockListProps> = ({ stocks, handleAction, successMessag
                 <tbody className="bg-white divide-y divide-gray-200">
                     {stocks.map((stock) => (
                         <React.Fragment key={stock.id}>
-                            <BuyRow stock={stock} />
+                            <BuyRow 
+                                stock={stock} 
+                                onBuy={handleBuy}
+                            />
                             {successMessages.find(msg => msg.symbol === stock.symbol) && (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-2">
@@ -86,7 +97,6 @@ const BuyList: React.FC<StockListProps> = ({ stocks, handleAction, successMessag
             </table>
         </div>
     )
-
 }
 
 export default BuyList;

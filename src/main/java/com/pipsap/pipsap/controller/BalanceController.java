@@ -2,17 +2,11 @@ package com.pipsap.pipsap.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.pipsap.pipsap.service.UserService;
 import com.pipsap.pipsap.model.User;
-
-
 import com.pipsap.pipsap.service.BalanceService;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/balance")
@@ -28,31 +22,26 @@ public class BalanceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Long> getBalance(@PathVariable Integer id) {
-
-        Long balance = balanceService.getBalance(id);
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable Integer id) {
+        BigDecimal balance = balanceService.getBalance(id);
         return ResponseEntity.ok(balance);
     }
     
     @PostMapping("/add")
-    public ResponseEntity<Void> addBalance(@RequestParam Integer id, @RequestParam Long amount) {
-
+    public ResponseEntity<Void> addBalance(@RequestParam Integer id, @RequestParam BigDecimal amount) {
         balanceService.addBalance(id, amount);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/subtract")
-    public ResponseEntity<Void> subtractBalance(@RequestParam Integer id, @RequestParam Long amount) {
-
-       balanceService.subtractBalance(id, amount); 
+    public ResponseEntity<Void> subtractBalance(@RequestParam Integer id, @RequestParam BigDecimal amount) {
+        balanceService.subtractBalance(id, amount); 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Void> updateBalance(@RequestParam Integer id, @RequestParam Long amount) {
-
+    public ResponseEntity<Void> updateBalance(@RequestParam Integer id, @RequestParam BigDecimal amount) {
         balanceService.updateBalance(id, amount);
         return ResponseEntity.ok().build();
     }
-
 }

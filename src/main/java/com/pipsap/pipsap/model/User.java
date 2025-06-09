@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "users")
@@ -27,7 +28,10 @@ public class User implements UserDetails {
    private String password;
 
     @Column(nullable= false)
-    private long balance;
+    private BigDecimal balance;
+
+    @Column(nullable = false)
+    private BigDecimal totalAccountValue;
 
     @Column(nullable = false)
     private String role = "ROLE_USER";
@@ -92,12 +96,20 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public long getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(long balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public BigDecimal getTotalAccountValue() {
+        return totalAccountValue;
+    }
+
+    public void setTotalAccountValue(BigDecimal totalAccountValue) {
+        this.totalAccountValue = totalAccountValue;
     }
 
 } 

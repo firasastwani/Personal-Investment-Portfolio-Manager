@@ -6,6 +6,7 @@ import com.pipsap.pipsap.model.Transaction;
 import com.pipsap.pipsap.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.pipsap.pipsap.repository.UserRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.math.BigDecimal;
 
 @Service
 public class PortfolioAnalyticsService {
@@ -25,6 +27,9 @@ public class PortfolioAnalyticsService {
 
     @Autowired
     private PortfolioService portfolioService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Get portfolio diversification by sector
@@ -214,18 +219,21 @@ public class PortfolioAnalyticsService {
      * @param user The user to calculate TAV for
      * @return Total account value
      */
-    public double getTotalAccountValue(User user) {
-        // Get user's balance
-        double balance = user.getBalance();
-        
+    public BigDecimal getTotalPortfoliosValue(User user) {
+
+        BigDecimal totalPortfolioValue = BigDecimal.ZERO;
+
         // Get all user's portfolios
         List<Portfolio> portfolios = portfolioService.getPortfoliosByUser(user);
         
         // Sum up all portfolio values
-        double totalPortfolioValue = portfolios.stream()
-            .mapToDouble(portfolio -> getTotalValueOfHoldings(portfolio.getPortfolioId()))
-            .sum();
+        for (Portfolio portfolio : portfolios) {
+            totalPortfolioValue = totalPortfolioValue.add(new BigDecimal(getTotalValueOfHoldings(portfolio.getPortfolioId())));
+        }
             
-        return balance + totalPortfolioValue;
+        user.setTotalAccountValue(totalPortfolioValue.add(user.getBalance()));
+        userRepository.save(user);
+
+        return totalPortfolioValue;
     }
 } 

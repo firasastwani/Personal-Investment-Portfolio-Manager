@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Service
 @SessionScope
@@ -92,7 +93,7 @@ public class UserService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("ROLE_USER");
-        user.setBalance(0L); // Initialize balance to 0
+        user.setBalance(BigDecimal.ZERO); // Initialize balance to 0
 
         userRepository.save(user);
         return true;

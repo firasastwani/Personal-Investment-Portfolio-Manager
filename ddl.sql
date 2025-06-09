@@ -8,6 +8,8 @@ CREATE TABLE if not exists users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    balance FLOAT NOT NULL DEFAULT 0.0,
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

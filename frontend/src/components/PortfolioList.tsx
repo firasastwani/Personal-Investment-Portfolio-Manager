@@ -1,6 +1,9 @@
+'use client';
+
 import React, { useCallback } from "react";
 import axios from "axios";
 import PortfolioRow from "./PortfolioRow";
+import { useBalance } from '@/app/context/BalanceContext';
 
 interface Stock {
     id: number;
@@ -12,21 +15,28 @@ interface Stock {
 
 interface StockListProps {
     portfolios: Stock[];
-    handleAction: (symbol: string) => void;
+    handleAction: (symbol: string) => Promise<void>;
 }
 
 const PortfolioList: React.FC<StockListProps> = ({ portfolios, handleAction }) => {
-    const handleTableClick = useCallback((event: React.MouseEvent<HTMLTableElement>) => {
+    const { refreshBalances } = useBalance();
+
+    const handleTableClick = useCallback(async (event: React.MouseEvent<HTMLTableElement>) => {
         const target = event.target as HTMLElement;
         const button = target.closest("button[data-action='sell']");
         if (button) {
             const row = button.closest("tr");
             const symbol = row?.getAttribute('data-symbol');
             if (symbol) {
-                handleAction(symbol);
+                try {
+                    await handleAction(symbol);
+                    await refreshBalances();
+                } catch (error) {
+                    console.error('Error selling stock:', error);
+                }
             }
         }
-    }, [handleAction]);
+    }, [handleAction, refreshBalances]);
 
     const handleAddToWatchList = (symbol: string) => {
         console.log(`Adding ${symbol} to watchlist`);
@@ -42,9 +52,7 @@ const PortfolioList: React.FC<StockListProps> = ({ portfolios, handleAction }) =
 
     return (
         <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200"
-                onClick={handleTableClick}
-            >
+            <table className="min-w-full divide-y divide-gray-200" onClick={handleTableClick}>
                 <thead>
                     <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

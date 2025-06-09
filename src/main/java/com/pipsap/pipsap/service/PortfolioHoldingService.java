@@ -10,12 +10,14 @@ import com.pipsap.pipsap.model.Transaction;
 import com.pipsap.pipsap.service.PortfolioService;
 import com.pipsap.pipsap.service.SecurityService;
 import com.pipsap.pipsap.service.TransactionService;
-
+import com.pipsap.pipsap.service.BalanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,12 +29,14 @@ public class PortfolioHoldingService {
 
     private final PortfolioHoldingRepository portfolioHoldingRepository;
     private final SecurityRepository securityRepository;
-
+    private final BalanceService balanceService;
     @Autowired
     public PortfolioHoldingService(PortfolioHoldingRepository portfolioHoldingRepository,
-                                 SecurityRepository securityRepository) {
+                                 SecurityRepository securityRepository,
+                                 BalanceService balanceService) {
         this.portfolioHoldingRepository = portfolioHoldingRepository;
         this.securityRepository = securityRepository;
+        this.balanceService = balanceService;
     }
 
     @Autowired
@@ -127,6 +131,13 @@ public class PortfolioHoldingService {
         Security security = securityService.getSecurityBySymbol(symbol)
             .orElseThrow(() -> new RuntimeException("Security not found"));
 
+        // Check if user has enough balance
+        if (balanceService.getBalance(user.getUserId()).compareTo(security.getStaticPrice().multiply(new BigDecimal(quantity))) < 0) {
+            throw new RuntimeException("Insufficient balance to buy security");
+        }
+
+        balanceService.subtractBalance(user.getUserId(), security.getStaticPrice().multiply(new BigDecimal(quantity))); 
+
         // Create transaction
         Transaction transaction = transactionService.createTransaction(
             portfolioId,
@@ -154,6 +165,9 @@ public class PortfolioHoldingService {
             createHolding(portfolioId, symbol, quantity);
         }
 
+        // Update total account value after transaction
+        balanceService.updateTotalAccountValue(user.getUserId());
+
         return transaction;
     }
 
@@ -179,6 +193,10 @@ public class PortfolioHoldingService {
             throw new RuntimeException("Insufficient quantity to sell");
         }
 
+
+        // Add price of sold security to balance
+        balanceService.addBalance(user.getUserId(), security.getStaticPrice().multiply(new BigDecimal(quantity))); 
+
         // Create transaction
         Transaction transaction = transactionService.createTransaction(
             portfolioId,
@@ -202,6 +220,9 @@ public class PortfolioHoldingService {
                 security.getStaticPrice()
             );
         }
+
+        // Update total account value after transaction
+        balanceService.updateTotalAccountValue(user.getUserId());
 
         return transaction;
     }

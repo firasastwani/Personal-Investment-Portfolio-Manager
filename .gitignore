@@ -16,6 +16,7 @@
 .project
 .classpath
 .settings/
+.cursorrules
 
 # OS files
 .DS_Store

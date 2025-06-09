@@ -65,15 +65,15 @@ export default function Buy() {
         return () => clearInterval(timer);
     }, []);
 
-    const handleBuyStock = async (symbol: string) => {
+    const handleBuyStock = async (symbol: string, quantity: number) => {
         try {
             setError(null);
-            await axios.post(`/api/holdings/buy/${id}/${symbol}?quantity=1`);
+            await axios.post(`/api/holdings/buy/${id}/${symbol}?quantity=${quantity}`);
             
             // Add success message with timestamp
             setSuccessMessages(prev => [...prev, {
                 symbol,
-                message: `Successfully bought ${symbol}`,
+                message: `Successfully bought ${quantity} shares of ${symbol}`,
                 timestamp: Date.now()
             }]);
 

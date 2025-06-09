@@ -10,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -106,12 +110,14 @@ public class PortfolioAnalyticsController {
     }
 
     @GetMapping("/total-account-value")
-    public ResponseEntity<Double> getTotalAccountValue() {
+    public ResponseEntity<BigDecimal> getTotalAccountValue() {
         try {
             User currentUser = getCurrentUser();
-            return ResponseEntity.ok(portfolioAnalyticsService.getTotalAccountValue(currentUser));
+            return ResponseEntity.ok(currentUser.getTotalAccountValue());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("Error in getTotalAccountValue: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(401).build();
         }
     }
 } 
