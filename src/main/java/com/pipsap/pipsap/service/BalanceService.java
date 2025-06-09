@@ -97,6 +97,7 @@ public class BalanceService {
     }
 
 
+    // future implementation
     /*
     public void transferBalance(Integer fromId, Integer toId, Long amount) {
         User fromUser = userRepository.findById(fromId)
