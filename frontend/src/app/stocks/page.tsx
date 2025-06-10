@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import TabBar from "@/components/TabBar";
 import StockList from "@/components/StockList";
+import StockSearch from "@/components/StockSearch";
 
 interface Stock {
     id: number;
@@ -22,6 +23,7 @@ interface SuccessMessage {
 export default function Stocks() {
     const { user, loading, refreshUser } = useAuth();
     const [stocks, setStocks] = useState<Stock[]>([]);
+    const [filteredStocks, setFilteredStocks] = useState<Stock[]>([]);
     const [fetching, setFetching] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessages, setSuccessMessages] = useState<SuccessMessage[]>([]);
@@ -30,6 +32,7 @@ export default function Stocks() {
         try {
             const response = await axios.get("/api/securities");
             setStocks(response.data);
+            setFilteredStocks(response.data);
         } catch (error) {
             console.error("Error fetching stocks:", error);
             if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -94,30 +97,41 @@ export default function Stocks() {
         }
     };
 
-    if (loading || fetching) {
+    if (loading) {
         return <div>Loading...</div>;
     }
 
     if (!user) {
-        return <div>Please log in to access the stocks.</div>;
+        return <div>Please log in to view available stocks.</div>;
     }
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-100">
             <TabBar />
-            <div className="flex-grow flex justify-center pt-4 px-20">
-                <div className="bg-white p-6 rounded shadow-md w-full text-center">
-                    <h2 className="text-2xl font-bold mb-4">Available Stocks</h2>
+            <div className="flex-grow container mx-auto px-4 py-8">
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h1 className="text-2xl font-bold mb-6">Available Stocks</h1>
+                    
                     {error && (
                         <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
                             {error}
                         </div>
                     )}
-                    <StockList 
+
+                    <StockSearch 
                         stocks={stocks} 
-                        handleAction={handleAddToWatchList}
-                        successMessages={successMessages}
+                        onSearch={setFilteredStocks} 
                     />
+
+                    {fetching ? (
+                        <p>Loading stocks...</p>
+                    ) : (
+                        <StockList 
+                            stocks={filteredStocks} 
+                            handleAction={handleAddToWatchList}
+                            successMessages={successMessages}
+                        />
+                    )}
                 </div>
             </div>
         </div>
