@@ -88,8 +88,10 @@ export default function Stocks() {
                 if (error.response?.status === 401) {
                     setError("Your session has expired. Please log in again.");
                     await refreshUser();
+                } else if (error.response?.status === 409) {
+                    setError(`${symbol} is already in your watchlist.`);
                 } else {
-                    setError("Failed to add to watchlist. Please try again.");
+                    setError(error.response?.data?.message || "Failed to add to watchlist. Please try again.");
                 }
             } else {
                 setError("An unexpected error occurred. Please try again.");
