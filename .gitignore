@@ -28,3 +28,9 @@ Thumbs.db
 
 # Environment files
 .env
+
+
+# Generated files
+/services/stock-price-service/target/
+/services/stock-price-service/src/main/proto/stock_price.proto
+/services/stock-price-service/src/main/proto/stock_price.proto
