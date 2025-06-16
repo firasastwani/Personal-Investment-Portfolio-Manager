@@ -1,12 +1,12 @@
 server:
-  port: 9091
+  port: -1 # Disable HTTP server to avoid port conflicts
 
 spring:
   application:
     name: stock-price-service
 
   kafka:
-    bootstrap-servers: localhost:9092  # Kafka container/service
+    bootstrap-servers: localhost:9092 # Kafka container/service
     consumer:
       group-id: stock-price-consumer-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -19,8 +19,8 @@ spring:
 grpc:
   server:
     port: 9090
-    security:
-      enabled: false
+    address: localhost
+    enable-reflection: true
 
 # Custom config for your service
 finnhub:
@@ -32,3 +32,5 @@ logging:
     root: INFO
     org.apache.kafka: WARN
     com.pipsap.stockpriceservice: DEBUG
+    org.springframework.grpc: DEBUG
+    io.grpc: DEBUG
