@@ -1,0 +1,34 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: stock-price-service
+
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka container/service
+    consumer:
+      group-id: stock-price-consumer-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+grpc:
+  server:
+    port: 9090
+    security:
+      enabled: false
+
+# Custom config for your service
+finnhub:
+  api-key: d162ko1r01qhsocmb2g0d162ko1r01qhsocmb2gg
+  base-url: https://finnhub.io/api/v1/quote
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: WARN
+    com.pipsap.stockpriceservice: DEBUG
