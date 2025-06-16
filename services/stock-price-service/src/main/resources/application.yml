@@ -22,11 +22,6 @@ grpc:
     address: localhost
     enable-reflection: true
 
-# Custom config for your service
-finnhub:
-  api-key: d162ko1r01qhsocmb2g0d162ko1r01qhsocmb2gg
-  base-url: https://finnhub.io/api/v1/quote
-
 logging:
   level:
     root: INFO

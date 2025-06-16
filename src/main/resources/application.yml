@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: pipsap
+
+  datasource:
+    url: jdbc:mysql://localhost:33306/pipsap_db
+    username: root
+    password: mysqlpass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: pipsap-monolith-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 900000
+    refresh-expiration: 86400000
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web:
+          servlet: DEBUG
+          filter: DEBUG
+          cors: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    com:
+      pipsap:
+        pipsap: DEBUG
