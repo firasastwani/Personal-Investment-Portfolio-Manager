@@ -29,3 +29,7 @@ logging:
     com.pipsap.stockpriceservice: DEBUG
     org.springframework.grpc: DEBUG
     io.grpc: DEBUG
+
+finnhub:
+  api-key: d162ko1r01qhsocmb2g0d162ko1r01qhsocmb2gg
+  base-url: https://finnhub.io/api/v1/quote
