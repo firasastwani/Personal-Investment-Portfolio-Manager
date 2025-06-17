@@ -12,13 +12,13 @@ with open('insert_securities.sql', 'w') as f:
     name VARCHAR(100),
     exchange VARCHAR(50),
     sector VARCHAR(100),
-    static_price DECIMAL(10, 2) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD'
 );\n\n""")
     
     # Generate INSERT statements
     for index, row in df.iterrows():
-        sql = f"""INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+        sql = f"""INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     '{row['Ticker'].strip()}',
     '{row['Name'].strip().replace("'", "''")}',

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS securities (
     name VARCHAR(100),
     exchange VARCHAR(50),
     sector VARCHAR(100),
-    static_price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD'
 );
 

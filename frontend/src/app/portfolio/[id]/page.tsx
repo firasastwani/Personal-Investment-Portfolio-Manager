@@ -8,12 +8,19 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import axios from "axios";
 
+interface Stock {
+    id: number;
+    symbol: string;
+    name: string;
+    price: number;
+}
+
 interface portfolioData {
     id: number;
     name: string;
     symbol: string;
     quantity: number
-    staticPrice: number;
+    price: number;
 }
 
 export default function PortfolioPage() {
@@ -99,7 +106,7 @@ export default function PortfolioPage() {
                 name: stock.security.name,
                 symbol: stock.security.symbol,
                 quantity: stock.quantity,
-                staticPrice: stock.security.staticPrice,
+                price: stock.security.price,
             }));
             setStocks(stocksData);
         } catch (error) {

@@ -4,7 +4,7 @@ interface Stock {
     id: number;
     name: string;
     symbol: string;
-    staticPrice: number;
+    price: number;
 }
 
 interface StockSearchProps {

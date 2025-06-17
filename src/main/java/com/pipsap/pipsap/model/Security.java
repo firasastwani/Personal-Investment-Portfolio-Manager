@@ -25,8 +25,8 @@ public class Security {
     @Column(length = 100)
     private String sector;
 
-    @Column(name = "static_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal staticPrice;
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(length = 10)
     private String currency;
@@ -80,12 +80,12 @@ public class Security {
         this.sector = sector;
     }
 
-    public BigDecimal getStaticPrice() {
-        return staticPrice;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setStaticPrice(BigDecimal staticPrice) {
-        this.staticPrice = staticPrice;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public String getCurrency() {

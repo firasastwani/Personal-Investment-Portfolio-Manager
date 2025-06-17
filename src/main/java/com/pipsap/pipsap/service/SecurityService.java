@@ -26,7 +26,7 @@ public class SecurityService {
 
     public List<Security> getAllSecurities() {
         List<Security> securities = new ArrayList<>();
-        final String sql = "SELECT security_id, symbol, name, exchange, sector, static_price, currency FROM securities";
+        final String sql = "SELECT security_id, symbol, name, exchange, sector, price, currency FROM securities";
 
         try (Connection conn = dataSource.getConnection()) {
             System.out.println("SecurityService: Successfully connected to database");
@@ -44,7 +44,7 @@ public class SecurityService {
                         security.setName(rs.getString("name"));
                         security.setExchange(rs.getString("exchange"));
                         security.setSector(rs.getString("sector"));
-                        security.setStaticPrice(rs.getBigDecimal("static_price"));
+                        security.setPrice(rs.getBigDecimal("price"));
                         security.setCurrency(rs.getString("currency"));
                         securities.add(security);
                     }
@@ -66,7 +66,7 @@ public class SecurityService {
     public java.math.BigDecimal getPriceBySymbol(String symbol) {
         Security security = getSecurityBySymbol(symbol)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Security not found"));
-        return security.getStaticPrice();
+        return security.getPrice();
     }
 
     public Security createSecurity(Security security) {

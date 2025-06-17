@@ -5,7 +5,7 @@ interface Stock {
     id: number;
     symbol: string;
     name: string;
-    staticPrice: number;
+    price: number;
 }
 
 interface StockListProps {
@@ -57,7 +57,7 @@ const WatchList: React.FC<StockListProps> = ({ stocks, handleAction }) => {
                                 <div className="font-medium">{stock.symbol}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="font-medium">${stock.staticPrice.toFixed(2)}</div>
+                                <div className="font-medium">${stock.price.toFixed(2)}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                 <button

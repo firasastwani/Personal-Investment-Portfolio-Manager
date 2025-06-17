@@ -115,7 +115,7 @@ SELECT
     name,
     exchange,
     sector,
-    static_price,
+    price,
     currency
 FROM securities
 WHERE symbol LIKE ? OR name LIKE ?
@@ -138,7 +138,7 @@ SELECT
     s.symbol,
     s.name,
     s.sector,
-    s.static_price,
+    s.price,
     w.added_at
 FROM watchlist w
 JOIN securities s ON w.security_id = s.security_id

@@ -3,7 +3,14 @@ interface Portfolio {
     name: string;
     symbol: string;
     quantity: number
-    staticPrice: number;
+    price: number;
+}
+
+interface Stock {
+    id: number;
+    symbol: string;
+    name: string;
+    price: number;
 }
 
 interface PortfolioRowProps {
@@ -12,7 +19,7 @@ interface PortfolioRowProps {
         name: string;
         symbol: string;
         quantity: number;
-        staticPrice: number;
+        price: number;
     };
 }
 
@@ -29,7 +36,7 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ portfolio }) => {
                 <div className="font-medium">{portfolio.quantity}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="font-medium">${portfolio.staticPrice.toFixed(2)}</div>
+                <div className="font-medium">${portfolio.price.toFixed(2)}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right">
                 <button

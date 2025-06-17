@@ -6,7 +6,7 @@ interface Stock {
     id: number;
     symbol: string;
     name: string;
-    staticPrice: number;
+    price: number;
 }
 
 interface SuccessMessage {

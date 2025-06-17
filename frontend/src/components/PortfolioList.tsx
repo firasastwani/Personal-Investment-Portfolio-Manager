@@ -5,16 +5,16 @@ import axios from "axios";
 import PortfolioRow from "./PortfolioRow";
 import { useBalance } from '@/app/context/BalanceContext';
 
-interface Stock {
+interface Portfolio {
     id: number;
     name: string;
     symbol: string;
     quantity: number;
-    staticPrice: number;
+    price: number;
 }
 
 interface StockListProps {
-    portfolios: Stock[];
+    portfolios: Portfolio[];
     handleAction: (symbol: string) => Promise<void>;
 }
 

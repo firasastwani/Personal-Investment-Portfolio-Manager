@@ -1,11 +1,11 @@
-CREATE TABLE IF NOT EXISTS securities (
-    security_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE securities (
+    security_id INT PRIMARY KEY AUTO_INCREMENT,
     symbol VARCHAR(10) NOT NULL UNIQUE,
     name VARCHAR(100),
     exchange VARCHAR(50),
     sector VARCHAR(100),
-    static_price DECIMAL(10, 2) NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD'
+    price DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10)
 );
 
 -- Run this after creating database to boost securities performance
@@ -13,7 +13,7 @@ CREATE INDEX idx_symbol ON securities(symbol);
 CREATE INDEX idx_name ON securities(name);
 
 
-INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     'AAPL',
     'APPLE INC',
@@ -22,7 +22,7 @@ VALUES (
     212.5,
     'USD'
 );
-INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     'MSFT',
     'MICROSOFT CORP',
@@ -31,7 +31,7 @@ VALUES (
     395.26,
     'USD'
 );
-INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     'NVDA',
     'NVIDIA CORP',
@@ -40,7 +40,7 @@ VALUES (
     108.92,
     'USD'
 );
-INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     'AMZN',
     'AMAZON COM INC',
@@ -49,7 +49,7 @@ VALUES (
     184.42,
     'USD'
 );
-INSERT INTO securities (symbol, name, exchange, sector, static_price, currency)
+INSERT INTO securities (symbol, name, exchange, sector, price, currency)
 VALUES (
     'META',
     'META PLATFORMS INC CLASS A',

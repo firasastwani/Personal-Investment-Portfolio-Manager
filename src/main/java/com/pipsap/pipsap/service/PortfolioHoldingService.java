@@ -62,8 +62,8 @@ public class PortfolioHoldingService {
         holding.setPortfolio(portfolio);
         holding.setSecurity(security);
         holding.setQuantity(quantity);
-        holding.setAveragePurchasePrice(security.getStaticPrice());
-        holding.setCurrentValue(security.getStaticPrice().multiply(new BigDecimal(quantity)));
+        holding.setAveragePurchasePrice(security.getPrice());
+        holding.setCurrentValue(security.getPrice().multiply(new BigDecimal(quantity)));
         holding.setLastUpdated(LocalDateTime.now());
 
         return portfolioHoldingRepository.save(holding);
@@ -132,11 +132,11 @@ public class PortfolioHoldingService {
             .orElseThrow(() -> new RuntimeException("Security not found"));
 
         // Check if user has enough balance
-        if (balanceService.getBalance(user.getUserId()).compareTo(security.getStaticPrice().multiply(new BigDecimal(quantity))) < 0) {
+        if (balanceService.getBalance(user.getUserId()).compareTo(security.getPrice().multiply(new BigDecimal(quantity))) < 0) {
             throw new RuntimeException("Insufficient balance to buy security");
         }
 
-        balanceService.subtractBalance(user.getUserId(), security.getStaticPrice().multiply(new BigDecimal(quantity))); 
+        balanceService.subtractBalance(user.getUserId(), security.getPrice().multiply(new BigDecimal(quantity))); 
 
         // Create transaction
         Transaction transaction = transactionService.createTransaction(
@@ -144,7 +144,7 @@ public class PortfolioHoldingService {
             symbol,
             Transaction.TransactionType.BUY,
             new BigDecimal(quantity),
-            security.getStaticPrice(),
+            security.getPrice(),
             "Buy transaction"
         );
 
@@ -158,7 +158,7 @@ public class PortfolioHoldingService {
             updateHolding(
                 holding.getId(),
                 newQuantity,
-                security.getStaticPrice()
+                security.getPrice()
             );
         } else {
             // Create new holding
@@ -195,7 +195,7 @@ public class PortfolioHoldingService {
 
 
         // Add price of sold security to balance
-        balanceService.addBalance(user.getUserId(), security.getStaticPrice().multiply(new BigDecimal(quantity))); 
+        balanceService.addBalance(user.getUserId(), security.getPrice().multiply(new BigDecimal(quantity))); 
 
         // Create transaction
         Transaction transaction = transactionService.createTransaction(
@@ -203,7 +203,7 @@ public class PortfolioHoldingService {
             symbol,
             Transaction.TransactionType.SELL,
             new BigDecimal(quantity),
-            security.getStaticPrice(),
+            security.getPrice(),
             "Sell transaction"
         );
 
@@ -217,7 +217,7 @@ public class PortfolioHoldingService {
             updateHolding(
                 holding.getId(),
                 newQuantity,
-                security.getStaticPrice()
+                security.getPrice()
             );
         }
 

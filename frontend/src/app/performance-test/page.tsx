@@ -8,9 +8,9 @@ import axios from "axios";
 
 interface Stock {
     id: number;
-    name: string;
     symbol: string;
-    staticPrice: number;
+    name: string;
+    price: number;
 }
 
 interface RenderMeasurement {

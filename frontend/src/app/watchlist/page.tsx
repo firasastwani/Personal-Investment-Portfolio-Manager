@@ -11,7 +11,7 @@ interface Stock {
     id: number;
     name: string;
     symbol: string;
-    staticPrice: number;
+    price: number;
 }
 
 export default function Watchlist() {
@@ -29,7 +29,7 @@ export default function Watchlist() {
                 id: stock.id,
                 name: stock.security.name,
                 symbol: stock.security.symbol,
-                staticPrice: stock.security.staticPrice,
+                price: stock.security.price,
             }));
             setStocks(stocksData);
         } catch (error) {
