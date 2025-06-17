@@ -28,7 +28,14 @@ Thumbs.db
 
 # Environment files
 .env
+*.env
+.env.*
 
+# Application configuration files with sensitive data
+**/application-*.yml
+**/application-*.properties
+**/application-*.yaml
+**/application-*.xml
 
 # Generated files
 /services/stock-price-service/target/
