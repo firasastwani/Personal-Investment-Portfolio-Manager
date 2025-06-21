@@ -96,4 +96,21 @@ public class SecurityService {
     public void deleteSecurity(Integer id) {
         securityRepository.deleteById(id);
     }
+    
+    public void updateSecurityPrice(String symbol, java.math.BigDecimal newPrice){
+
+        Optional<Security> securityOpt = getSecurityBySymbol(symbol);
+
+        if(securityOpt.isPresent()){
+
+            Security security = securityOpt.get();
+
+            security.setPrice(newPrice);
+            securityRepository.save(security);
+        } else {
+
+            throw new RuntimeException("Security not found: " + symbol);
+        }
+
+    }
 } 
