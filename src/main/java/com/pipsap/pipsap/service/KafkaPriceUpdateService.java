@@ -1,6 +1,5 @@
 package com.pipsap.pipsap.service;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +18,7 @@ import java.math.BigDecimal;
 @Service
 public class KafkaPriceUpdateService {
 
-
     private static final Logger logger = LoggerFactory.getLogger(KafkaPriceUpdateService.class);
-
     
     private final KafkaTemplate<String, String> kafkaTemplate; 
     private final PriceCacheService priceCacheService; 

@@ -15,14 +15,18 @@ import java.util.List;
 
 @Service
 public class WatchlistService {
-    @Autowired
-    private WatchlistRepository watchlistRepository;
+
+    private final WatchlistRepository watchlistRepository;
+    private final SecurityService securityService;
+    private final UserService userService;
 
     @Autowired
-    private SecurityService securityService;
+    public WatchlistService(WatchlistRepository watchlistRepository, SecurityService securityService, UserService userService) {
+        this.watchlistRepository = watchlistRepository;
+        this.securityService = securityService;
+        this.userService = userService;
+    }
 
-    @Autowired
-    private UserService userService;
 
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

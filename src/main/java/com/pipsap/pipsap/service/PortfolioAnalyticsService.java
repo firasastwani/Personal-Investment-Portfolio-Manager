@@ -22,14 +22,16 @@ import java.math.BigDecimal;
 @Service
 public class PortfolioAnalyticsService {
 
-    @Autowired
-    private DataSource dataSource;
+    private final DataSource dataSource;
+    private final PortfolioService portfolioService;
+    private final UserRepository userRepository;
 
     @Autowired
-    private PortfolioService portfolioService;
-
-    @Autowired
-    private UserRepository userRepository;
+    public PortfolioAnalyticsService(DataSource dataSource, PortfolioService portfolioService, UserRepository userRepository) {
+        this.dataSource = dataSource;
+        this.portfolioService = portfolioService;
+        this.userRepository = userRepository;
+    }
 
     /**
      * Get portfolio diversification by sector

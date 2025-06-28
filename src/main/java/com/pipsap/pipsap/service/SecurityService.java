@@ -18,11 +18,17 @@ import java.util.Optional;
 
 @Service
 public class SecurityService {
-    @Autowired
-    private SecurityRepository securityRepository;
+
+
+    private final SecurityRepository securityRepository;
+    private final DataSource dataSource;
 
     @Autowired
-    private DataSource dataSource;
+    public SecurityService(SecurityRepository securityRepository, DataSource dataSource) {
+        this.securityRepository = securityRepository;
+        this.dataSource = dataSource;
+    }
+
 
     public List<Security> getAllSecurities() {
         List<Security> securities = new ArrayList<>();

@@ -25,13 +25,11 @@ import java.math.BigDecimal;
 @Service
 @SessionScope
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     private final DataSource dataSource;
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
     private User loggedInUser = null; 
 
     @Autowired

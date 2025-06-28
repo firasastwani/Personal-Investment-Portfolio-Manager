@@ -15,17 +15,16 @@ import java.util.Optional;
 @Service
 public class PortfolioService {
 
-    @Autowired
-    private PortfolioRepository portfolioRepository;
+    private final PortfolioRepository portfolioRepository;
+    private final UserService userService;
+    private final PortfolioHoldingRepository portfolioHoldingRepository;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserService User;
-
-    @Autowired
-    private PortfolioHoldingRepository portfolioHoldingRepository;
+    public PortfolioService(PortfolioRepository portfolioRepository, UserService userService, PortfolioHoldingRepository portfolioHoldingRepository) {
+        this.portfolioRepository = portfolioRepository;
+        this.userService = userService;
+        this.portfolioHoldingRepository = portfolioHoldingRepository;
+    }
 
     public Portfolio createPortfolio(Portfolio portfolio) {
         return portfolioRepository.save(portfolio);
