@@ -34,6 +34,7 @@ public class KafkaPriceUpdateService {
     @Value("${price-update.microservice.kafka.request-topic}")   
     private String requestTopic; 
 
+    // TODO: No response in monolith, just updates the db and cache?
     @Value("${price-update.microservice.kafka.response-topic}")
     private String responseTopic; 
 

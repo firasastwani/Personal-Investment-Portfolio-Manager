@@ -32,7 +32,7 @@ SELECT
 FROM portfolios p
 JOIN portfolio_holdings ph ON p.portfolio_id = ph.portfolio_id
 JOIN securities s ON ph.security_id = s.security_id
-WHERE p.portfolio_id = ?
+WHERE p.portfolio_id = 23
 GROUP BY p.portfolio_id, p.name, s.sector
 ORDER BY total_value DESC';
 
@@ -82,7 +82,7 @@ SELECT
     t.notes
 FROM transactions t
 JOIN securities s ON t.security_id = s.security_id
-WHERE t.portfolio_id = ?  -- Replace 1 with actual portfolio_id for testing
+WHERE t.portfolio_id = 23  -- Replace 1 with actual portfolio_id for testing
 ORDER BY t.transaction_date DESC
 LIMIT 10;  -- Replace 10 with desired limit
 

@@ -19,7 +19,8 @@ public class PricePublishService {
 
     public void publishPrices(Map<String, String> prices) {
         for (Map.Entry<String, String> entry : prices.entrySet()) {
-            kafkaTemplate.send(topic, entry.getKey(), entry.getValue());
+            String message = entry.getKey() + ":" + entry.getValue();
+            kafkaTemplate.send(topic, message);
         }
     }
     

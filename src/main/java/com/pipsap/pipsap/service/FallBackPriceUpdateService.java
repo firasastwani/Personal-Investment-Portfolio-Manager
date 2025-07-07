@@ -18,7 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  */
 
 @Service
-//@ConditionalOnProperty(name = "price-update.kafka.enabled", havingValue = "false")
+@ConditionalOnProperty(name = "price-update.kafka.enabled", havingValue = "false")
 public class FallBackPriceUpdateService {
 
     private static final Logger logger = LoggerFactory.getLogger(FallBackPriceUpdateService.class);
@@ -59,13 +59,10 @@ public class FallBackPriceUpdateService {
         logger.info("Simulating single price update for {}", symbol);
 
         try {
-
             BigDecimal currentPrice = securityService.getPriceBySymbol(symbol);
-
             priceCacheService.cachePrice(symbol, currentPrice);
 
             logger.debug("Cached price for {}: {}", symbol, currentPrice);
-
         } catch(Exception e){
             logger.error("Error processing price update for {}: {}", symbol, e.getMessage());
         }
@@ -77,7 +74,6 @@ public class FallBackPriceUpdateService {
 
         logger.debug("Getting batch prices for {} symbols (Kafka disabled)", symbols);
         return priceCacheService.getBatchPrices(java.util.Set.copyOf(symbols));
-
     }
 
     // if kafka enabled is set to false in the config, this will be auto true 

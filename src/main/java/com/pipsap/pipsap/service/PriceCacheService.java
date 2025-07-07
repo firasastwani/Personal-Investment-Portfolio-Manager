@@ -2,6 +2,7 @@ package com.pipsap.pipsap.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -31,7 +32,7 @@ public class PriceCacheService {
     @Value("${price-update.cache.ttl-minutes}")
     private int cacheTTLMinutes;
 
-    private final ObjectMapper objectMapper = new ObjectMapper(); 
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule()); 
 
     // Have prefixs on keys for namespace seperation, keep related info together
     private static final String PRICE_CACHE_PREFIX = "security:price:";
@@ -123,7 +124,7 @@ public class PriceCacheService {
 
     public void cacheBatchPrices(Map<String, BigDecimal> prices){
 
-        for(Map.Entry<String, BigDecimal> entry: prices.entrySet()){
+        for(Map.Entry<String, BigDecimal> entry: prices.entrySet()) {
 
             cachePrice(entry.getKey(), entry.getValue());
         }   

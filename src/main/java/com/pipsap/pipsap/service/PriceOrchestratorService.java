@@ -33,7 +33,11 @@ public class PriceOrchestratorService {
     private boolean kafkaEnabled;
 
     @Autowired
-    public PriceOrchestratorService(PriceUpdateAlgorithmService algorithmService, FallBackPriceUpdateService fallBackPriceUpdateService, KafkaPriceUpdateService kafkaPriceUpdateService, PriceCacheService priceCacheService, SecurityService securityService) {
+    public PriceOrchestratorService(PriceUpdateAlgorithmService algorithmService, 
+                                   KafkaPriceUpdateService kafkaPriceUpdateService, 
+                                   PriceCacheService priceCacheService, 
+                                   SecurityService securityService,
+                                   @Autowired(required = false) FallBackPriceUpdateService fallBackPriceUpdateService) {
         this.algorithmService = algorithmService;
         this.fallBackPriceUpdateService = fallBackPriceUpdateService;
         this.kafkaPriceUpdateService = kafkaPriceUpdateService;
@@ -41,7 +45,7 @@ public class PriceOrchestratorService {
         this.securityService = securityService;
     }
     
-    @Scheduled(fixedRate = 300000) // 300,000 ms = 5 min    
+    // @Scheduled(fixedRate = 300000) // 300,000 ms = 5 min - PAUSED FOR TESTING
     public void scheduledPriceUpdate(){
 
         logger.info("Running scheduled price update");
