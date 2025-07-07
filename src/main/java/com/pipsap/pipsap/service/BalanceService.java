@@ -20,13 +20,11 @@ public class BalanceService {
 
     private final UserRepository userRepository;
     private final PortfolioAnalyticsService portfolioAnalyticsService;
-    private final PortfolioService portfolioService;
    
     @Autowired
-    public BalanceService(UserRepository userRepository, PortfolioAnalyticsService portfolioAnalyticsService, PortfolioService portfolioService) {
+    public BalanceService(UserRepository userRepository, PortfolioAnalyticsService portfolioAnalyticsService) {
         this.userRepository = userRepository;
         this.portfolioAnalyticsService = portfolioAnalyticsService;
-        this.portfolioService = portfolioService;
     }
 
     public BigDecimal getBalance(Integer id) {

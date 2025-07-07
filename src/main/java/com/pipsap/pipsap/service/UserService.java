@@ -25,13 +25,11 @@ import java.math.BigDecimal;
 @Service
 @SessionScope
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     private final DataSource dataSource;
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
     private User loggedInUser = null; 
 
     @Autowired
@@ -94,6 +92,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("ROLE_USER");
         user.setBalance(BigDecimal.ZERO); // Initialize balance to 0
+        user.setTotalAccountValue(BigDecimal.ZERO); // Initialize totalAccountValue to 0
 
         userRepository.save(user);
         return true;

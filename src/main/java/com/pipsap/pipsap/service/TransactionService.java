@@ -16,14 +16,17 @@ import java.util.Optional;
 
 @Service
 public class TransactionService {
-    @Autowired
-    private TransactionRepository transactionRepository;
 
-    @Autowired
-    private SecurityService securityService;
+    private final TransactionRepository transactionRepository;
+    private final SecurityService securityService;
+    private final PortfolioService portfolioService;
 
-    @Autowired
-    private PortfolioService portfolioService;
+    public TransactionService(TransactionRepository transactionRepository, SecurityService securityService, PortfolioService portfolioService) {
+        this.transactionRepository = transactionRepository;
+        this.securityService = securityService;
+        this.portfolioService = portfolioService;
+    }
+
 
     @Transactional
     public Transaction createTransaction(

@@ -18,11 +18,17 @@ import java.util.Optional;
 
 @Service
 public class SecurityService {
-    @Autowired
-    private SecurityRepository securityRepository;
+
+
+    private final SecurityRepository securityRepository;
+    private final DataSource dataSource;
 
     @Autowired
-    private DataSource dataSource;
+    public SecurityService(SecurityRepository securityRepository, DataSource dataSource) {
+        this.securityRepository = securityRepository;
+        this.dataSource = dataSource;
+    }
+
 
     public List<Security> getAllSecurities() {
         List<Security> securities = new ArrayList<>();
@@ -95,5 +101,22 @@ public class SecurityService {
 
     public void deleteSecurity(Integer id) {
         securityRepository.deleteById(id);
+    }
+    
+    public void updateSecurityPrice(String symbol, java.math.BigDecimal newPrice){
+
+        Optional<Security> securityOpt = getSecurityBySymbol(symbol);
+
+        if(securityOpt.isPresent()){
+
+            Security security = securityOpt.get();
+
+            security.setPrice(newPrice);
+            securityRepository.save(security);
+        } else {
+
+            throw new RuntimeException("Security not found: " + symbol);
+        }
+
     }
 } 

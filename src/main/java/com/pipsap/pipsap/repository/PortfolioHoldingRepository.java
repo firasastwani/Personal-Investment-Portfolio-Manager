@@ -26,4 +26,7 @@ public interface PortfolioHoldingRepository extends JpaRepository<PortfolioHoldi
     // Check if a holding exists for a portfolio and security
     boolean existsByPortfolioAndSecurity(Portfolio portfolio, Security security);
 
+    // the amount of this symbol owned in portfolios
+    long countBySecuritySymbol(String symbol);
+
 } 

@@ -17,18 +17,50 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
 
+  redis:
+    host: localhost
+    port: 6379 # default redis port
+    timeout: 2000ms # 2 seconds
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
   kafka:
     bootstrap-servers: localhost:9092
-
     consumer:
       group-id: pipsap-monolith-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+price-update:
+  # cache properties
+  cache:
+    ttl-minutes: 10
+    max-batch-size: 50
+  # Algorithm properties
+  algorithm:
+    portfolio-weight: 0.6
+    watchlist-weight: 0.3
+    time-weight: 0.1
+    min-update-interval-minutes: 5
+  microservice:
+    grpc:
+      host: localhost
+      port: 9090 # default gRPC port
+    kafka:
+      request-topic: price-update-requests
+      response-topic: stock-price-updates
+      enabled: true
+  logging:
+    level:
+      com.pipsap.pipsap.service: DEBUG
 
 app:
   jwt:

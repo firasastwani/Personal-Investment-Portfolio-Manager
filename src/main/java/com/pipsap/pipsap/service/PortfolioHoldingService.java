@@ -30,6 +30,7 @@ public class PortfolioHoldingService {
     private final PortfolioHoldingRepository portfolioHoldingRepository;
     private final SecurityRepository securityRepository;
     private final BalanceService balanceService;
+
     @Autowired
     public PortfolioHoldingService(PortfolioHoldingRepository portfolioHoldingRepository,
                                  SecurityRepository securityRepository,
