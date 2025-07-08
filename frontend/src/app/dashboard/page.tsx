@@ -114,12 +114,6 @@ export default function Dashboard() {
                                         >
                                             View Portfolio
                                         </button>
-                                        <button
-                                            onClick={() => handleRemove(portfolio.portfolioId)}
-                                            className="text-red-500 border border-red-300 rounded py-2 hover:text-red-600"
-                                        >
-                                            Remove Portfolio
-                                        </button>
                                     </div>
                                 </div>
                             ))}
