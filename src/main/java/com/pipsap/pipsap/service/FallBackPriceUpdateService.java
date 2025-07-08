@@ -10,6 +10,10 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.pipsap.pipsap.service.PortfolioAnalyticsService;
+import com.pipsap.pipsap.repository.UserRepository;
+import com.pipsap.pipsap.model.User;
+import com.pipsap.pipsap.service.PortfolioHoldingService;
 
 
 /*
@@ -25,11 +29,19 @@ public class FallBackPriceUpdateService {
 
     private final SecurityService securityService; 
     private final PriceCacheService priceCacheService;
+    private final PortfolioAnalyticsService portfolioAnalyticsService;
+    private final UserRepository userRepository;
+    private final PortfolioHoldingService portfolioHoldingService;
 
     @Autowired
-    public FallBackPriceUpdateService(SecurityService securityService, PriceCacheService priceCacheService) {
+    public FallBackPriceUpdateService(SecurityService securityService, PriceCacheService priceCacheService, 
+                                     PortfolioAnalyticsService portfolioAnalyticsService, UserRepository userRepository,
+                                     PortfolioHoldingService portfolioHoldingService) {
         this.securityService = securityService;
         this.priceCacheService = priceCacheService;
+        this.portfolioAnalyticsService = portfolioAnalyticsService;
+        this.userRepository = userRepository;
+        this.portfolioHoldingService = portfolioHoldingService;
     }
 
     public void simulateBatchPriceUpdate(List<String> symbols){
@@ -44,6 +56,9 @@ public class FallBackPriceUpdateService {
                 
                 // cache so less load on db
                 priceCacheService.cachePrice(symbol, currentPrice);
+                
+                // Update portfolio holdings for this security
+                portfolioHoldingService.updateAllHoldingsForSecurity(symbol, currentPrice);
 
                 logger.debug("Cached price for {}: {}", symbol, currentPrice);
 
@@ -52,6 +67,9 @@ public class FallBackPriceUpdateService {
             }
 
         }
+        
+        // Record TAV for all users after price updates
+        recordTAVForAllUsers();
     }
 
     public void simulateSinglePriceUpdate(String symbol){
@@ -79,6 +97,26 @@ public class FallBackPriceUpdateService {
     // if kafka enabled is set to false in the config, this will be auto true 
     public boolean isFallbackActive(){
         return true;
+    }
+    
+    /**
+     * Record TAV for all users after price updates
+     */
+    private void recordTAVForAllUsers() {
+        try {
+            List<User> allUsers = userRepository.findAll();
+            for (User user : allUsers) {
+                try {
+                    portfolioAnalyticsService.recordCurrentTAV(user);
+                    logger.debug("Recorded TAV for user: {}", user.getUsername());
+                } catch (Exception e) {
+                    logger.error("Error recording TAV for user {}: {}", user.getUsername(), e.getMessage());
+                }
+            }
+            logger.info("Recorded TAV for {} users after price updates", allUsers.size());
+        } catch (Exception e) {
+            logger.error("Error recording TAV for all users: {}", e.getMessage());
+        }
     }
 
 }

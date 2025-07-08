@@ -103,6 +103,38 @@ public class PortfolioHoldingService {
 
         return portfolioHoldingRepository.save(holding);
     }
+    
+    /**
+     * Update current value of a holding when security price changes
+     * @param holdingId The ID of the holding to update
+     * @param newPrice The new security price
+     */
+    @Transactional
+    public void updateHoldingValue(Integer holdingId, BigDecimal newPrice) {
+        PortfolioHolding holding = portfolioHoldingRepository.findById(holdingId)
+            .orElseThrow(() -> new RuntimeException("Holding not found"));
+        
+        holding.setCurrentValue(newPrice.multiply(new BigDecimal(holding.getQuantity())));
+        holding.setLastUpdated(LocalDateTime.now());
+        
+        portfolioHoldingRepository.save(holding);
+    }
+    
+    /**
+     * Update all holdings for a specific security when its price changes
+     * @param symbol The security symbol
+     * @param newPrice The new security price
+     */
+    @Transactional
+    public void updateAllHoldingsForSecurity(String symbol, BigDecimal newPrice) {
+        List<PortfolioHolding> holdings = portfolioHoldingRepository.findBySecurity_Symbol(symbol);
+        
+        for (PortfolioHolding holding : holdings) {
+            holding.setCurrentValue(newPrice.multiply(new BigDecimal(holding.getQuantity())));
+            holding.setLastUpdated(LocalDateTime.now());
+            portfolioHoldingRepository.save(holding);
+        }
+    }
 
     public boolean holdingExists(Portfolio portfolio, String symbol) {
         Optional<Security> security = securityRepository.findBySymbol(symbol);

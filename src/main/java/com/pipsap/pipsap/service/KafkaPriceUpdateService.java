@@ -11,6 +11,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import com.pipsap.pipsap.service.PriceCacheService;
 import com.pipsap.pipsap.service.SecurityService;
+import com.pipsap.pipsap.service.PortfolioAnalyticsService;
+import com.pipsap.pipsap.repository.UserRepository;
+import com.pipsap.pipsap.model.User;
+import com.pipsap.pipsap.service.PortfolioHoldingService;
 
 import java.util.List; 
 import java.math.BigDecimal; 
@@ -23,12 +27,20 @@ public class KafkaPriceUpdateService {
     private final KafkaTemplate<String, String> kafkaTemplate; 
     private final PriceCacheService priceCacheService; 
     private final SecurityService securityService;
+    private final PortfolioAnalyticsService portfolioAnalyticsService;
+    private final UserRepository userRepository;
+    private final PortfolioHoldingService portfolioHoldingService;
 
     @Autowired
-    public KafkaPriceUpdateService(KafkaTemplate<String, String> kafkaTemplate, PriceCacheService priceCacheService, SecurityService securityService) {
+    public KafkaPriceUpdateService(KafkaTemplate<String, String> kafkaTemplate, PriceCacheService priceCacheService, 
+                                  SecurityService securityService, PortfolioAnalyticsService portfolioAnalyticsService, 
+                                  UserRepository userRepository, PortfolioHoldingService portfolioHoldingService) {
         this.kafkaTemplate = kafkaTemplate;
         this.priceCacheService = priceCacheService;
         this.securityService = securityService;
+        this.portfolioAnalyticsService = portfolioAnalyticsService;
+        this.userRepository = userRepository;
+        this.portfolioHoldingService = portfolioHoldingService;
     }
 
     @Value("${price-update.microservice.kafka.request-topic}")   
@@ -104,11 +116,20 @@ public class KafkaPriceUpdateService {
 
                     BigDecimal price = new BigDecimal(priceStr);
 
+                    // Validate the price - reject zero or negative prices
+                    if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                        logger.warn("Rejecting invalid price for {}: {} (must be > 0)", symbol, priceStr);
+                        return;
+                    }
+
                     priceCacheService.cachePrice(symbol, price);
 
                     securityService.updateSecurityPrice(symbol, price);
+                    
+                    // Update portfolio holdings for this security
+                    portfolioHoldingService.updateAllHoldingsForSecurity(symbol, price);
 
-                    logger.info("Successfully process price update for: {}: {}, symbol, priceStr");
+                    logger.info("Successfully processed price update for: {}: {}", symbol, priceStr);
 
                 } catch(NumberFormatException e){
 
@@ -117,6 +138,10 @@ public class KafkaPriceUpdateService {
             } else {
                 logger.error("invalid message format: {}", message); 
             }
+            
+            // Record TAV for all users after price update
+            recordTAVForAllUsers();
+            
         } catch(Exception e){
 
             logger.error("Error processing price update message: {}", e.getMessage(), e); 
@@ -142,6 +167,26 @@ public class KafkaPriceUpdateService {
 
             logger.error("Error sending price update request for: {}", e.getMessage(), e);
             logger.warn("Cont without kafka, using cache/DB");
+        }
+    }
+    
+    /**
+     * Record TAV for all users after price updates
+     */
+    private void recordTAVForAllUsers() {
+        try {
+            List<User> allUsers = userRepository.findAll();
+            for (User user : allUsers) {
+                try {
+                    portfolioAnalyticsService.recordCurrentTAV(user);
+                    logger.debug("Recorded TAV for user: {}", user.getUsername());
+                } catch (Exception e) {
+                    logger.error("Error recording TAV for user {}: {}", user.getUsername(), e.getMessage());
+                }
+            }
+            logger.info("Recorded TAV for {} users after price updates", allUsers.size());
+        } catch (Exception e) {
+            logger.error("Error recording TAV for all users: {}", e.getMessage());
         }
     }
 

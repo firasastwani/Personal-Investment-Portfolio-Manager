@@ -126,6 +126,10 @@ public class PortfolioAnalyticsController {
             @RequestParam(defaultValue = "7") int days) {
         try {
             User currentUser = getCurrentUser();
+            
+            // Record current TAV for today
+            portfolioAnalyticsService.recordCurrentTAV(currentUser);
+            
             return ResponseEntity.ok(portfolioAnalyticsService.getHistoricalTAVData(currentUser, days));
         } catch (Exception e) {
             System.err.println("Error in getHistoricalTAVData: " + e.getMessage());
