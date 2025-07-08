@@ -238,4 +238,53 @@ public class PortfolioAnalyticsService {
 
         return totalPortfolioValue;
     }
+
+    /**
+     * Get historical TAV data for the past few days
+     * Since we don't have historical data storage, we'll generate simulated data
+     * based on current portfolio holdings and simulate price movements
+     * @param user The user to get historical TAV for
+     * @param days Number of days to look back (default 7)
+     * @return List of historical TAV data points
+     */
+    public List<Map<String, Object>> getHistoricalTAVData(User user, int days) {
+        List<Map<String, Object>> historicalData = new ArrayList<>();
+        
+        // Get current TAV
+        BigDecimal currentTAV = getTotalPortfoliosValue(user).add(user.getBalance());
+        
+        // Generate historical data points for the past 'days' days
+        for (int i = days; i >= 0; i--) {
+            Map<String, Object> dataPoint = new HashMap<>();
+            
+            // Calculate date
+            java.time.LocalDate date = java.time.LocalDate.now().minusDays(i);
+            dataPoint.put("date", date.toString());
+            
+            // Simulate TAV with some variation (±5% daily change)
+            double variation = 1.0 + (Math.random() - 0.5) * 0.1; // ±5% variation
+            BigDecimal simulatedTAV = currentTAV.multiply(new BigDecimal(variation));
+            dataPoint.put("tav", simulatedTAV.doubleValue());
+            
+            // Calculate PnL (Profit and Loss)
+            if (i == days) {
+                // First day - no PnL
+                dataPoint.put("pnl", 0.0);
+                dataPoint.put("pnlPercentage", 0.0);
+            } else {
+                // Calculate PnL from previous day
+                BigDecimal previousTAV = new BigDecimal(historicalData.get(historicalData.size() - 1).get("tav").toString());
+                BigDecimal pnl = simulatedTAV.subtract(previousTAV);
+                double pnlPercentage = previousTAV.doubleValue() > 0 ? 
+                    (pnl.doubleValue() / previousTAV.doubleValue()) * 100 : 0.0;
+                
+                dataPoint.put("pnl", pnl.doubleValue());
+                dataPoint.put("pnlPercentage", pnlPercentage);
+            }
+            
+            historicalData.add(dataPoint);
+        }
+        
+        return historicalData;
+    }
 } 

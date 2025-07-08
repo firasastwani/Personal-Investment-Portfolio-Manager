@@ -120,4 +120,17 @@ public class PortfolioAnalyticsController {
             return ResponseEntity.status(401).build();
         }
     }
+
+    @GetMapping("/historical-tav")
+    public ResponseEntity<List<Map<String, Object>>> getHistoricalTAVData(
+            @RequestParam(defaultValue = "7") int days) {
+        try {
+            User currentUser = getCurrentUser();
+            return ResponseEntity.ok(portfolioAnalyticsService.getHistoricalTAVData(currentUser, days));
+        } catch (Exception e) {
+            System.err.println("Error in getHistoricalTAVData: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(401).build();
+        }
+    }
 } 
