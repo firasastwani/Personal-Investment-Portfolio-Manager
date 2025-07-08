@@ -48,7 +48,15 @@ const TAVChart: React.FC<TAVChartProps> = ({ days = 7 }) => {
         setLoading(true);
         setError(null);
         
-        const response = await axios.get(`/api/analytics/historical-tav?days=${days}`);
+        // Get the token from localStorage (assuming it's stored there)
+        const token = localStorage.getItem('token');
+        
+        const response = await axios.get(`/api/analytics/historical-tav?days=${days}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         setData(response.data);
       } catch (error) {
         console.error('Error fetching historical TAV data:', error);
