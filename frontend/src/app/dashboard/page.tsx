@@ -64,19 +64,7 @@ export default function Dashboard() {
         }
     }, [user]);
 
-    const handleRemove = async (id: number) => {
-        try {
-            await axios.delete(`/api/portfolios/${id}`);
-            setPortfolios(prevPortfolios => 
-                prevPortfolios.filter(portfolio => portfolio.portfolioId !== id)
-            );
-        } catch (error) {
-            console.error("Error removing portfolio:", error);
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
-                await refreshUser();
-            }
-        }
-    };
+
 
     if (loading) {
         return <div>Loading...</div>;
