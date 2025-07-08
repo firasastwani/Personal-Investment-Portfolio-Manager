@@ -45,7 +45,7 @@ public class PriceOrchestratorService {
         this.securityService = securityService;
     }
     
-    @Scheduled(fixedRate = 300000) // 300,000 ms = 5 min - PAUSED FOR TESTING
+    //@Scheduled(fixedRate = 300000) // 300,000 ms = 5 min - PAUSED FOR TESTING
     public void scheduledPriceUpdate(){
 
         logger.info("Running scheduled price update");
@@ -214,7 +214,7 @@ public class PriceOrchestratorService {
         }
         
         // Skip invalid symbols like "--"
-        if (symbol.equals("--") || symbol.length() < 2) {
+        if (symbol.equals("--")) {
             return false;
         }
         

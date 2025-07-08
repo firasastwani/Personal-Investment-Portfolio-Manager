@@ -34,7 +34,7 @@ public class PriceRequestKafkaListner {
             Map<String, String> prices = new HashMap<>();
             for (String symbol : symbols) {
                 // Skip invalid symbols
-                if (symbol == null || symbol.trim().isEmpty() || symbol.equals("--") || symbol.length() < 2) {
+                if (symbol == null || symbol.trim().isEmpty() || symbol.equals("--")) {
                     logger.warn("Skipping invalid symbol: {}", symbol);
                     continue;
                 }

@@ -155,7 +155,7 @@ public class PriceUpdateAlgorithmService {
        }
        
        // Skip invalid symbols like "--"
-       if (symbol.equals("--") || symbol.length() < 2) {
+       if (symbol.equals("--")) {
            return false;
        }
        
