@@ -3,10 +3,13 @@ package com.pipsap.stockpriceservice.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.pipsap.stockpriceservice.model.FinnhubQuote;
 
 @Service
 public class PriceFetchService {
+    private static final Logger logger = LoggerFactory.getLogger(PriceFetchService.class);
 
     @Value("${finnhub.api-key}")
     private String apiKey;
@@ -18,13 +21,32 @@ public class PriceFetchService {
         this.restTemplate = restTemplate;
     }
     
-    public double fetchPrice(String symbol) {
+    public Double fetchPrice(String symbol) {
         try {
             String url = String.format("%s?symbol=%s&token=%s", FINNHUB_BASE_URL, symbol, apiKey);
+            logger.info("Fetching price for symbol: {}", symbol);
+            
             FinnhubQuote quote = restTemplate.getForObject(url, FinnhubQuote.class);
-            return quote != null ? quote.getCurrentPrice() : 0.0;
+            
+            if (quote == null) {
+                logger.warn("Received null quote for symbol: {}", symbol);
+                return null;
+            }
+            
+            double price = quote.getCurrentPrice();
+            
+            // Validate the price
+            if (price <= 0) {
+                logger.warn("Invalid price received for symbol {}: {}", symbol, price);
+                return null;
+            }
+            
+            logger.info("Successfully fetched price for {}: {}", symbol, price);
+            return price;
+            
         } catch (Exception e) {
-            return 0.0;
+            logger.error("Error fetching price for symbol {}: {}", symbol, e.getMessage());
+            return null;
         }
     }
 }

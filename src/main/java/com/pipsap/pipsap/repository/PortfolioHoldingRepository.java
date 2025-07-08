@@ -28,5 +28,8 @@ public interface PortfolioHoldingRepository extends JpaRepository<PortfolioHoldi
 
     // the amount of this symbol owned in portfolios
     long countBySecuritySymbol(String symbol);
+    
+    // Find all holdings for a specific security symbol
+    List<PortfolioHolding> findBySecurity_Symbol(String symbol);
 
 } 

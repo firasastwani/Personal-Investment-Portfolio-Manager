@@ -12,6 +12,7 @@ import java.util.List;
 import com.pipsap.pipsap.model.Portfolio;
 import com.pipsap.pipsap.service.PortfolioAnalyticsService;
 import com.pipsap.pipsap.service.PortfolioService;
+import com.pipsap.pipsap.model.User;
 
 
 
@@ -92,6 +93,9 @@ public class BalanceService {
 
         user.setTotalAccountValue(totalAccountValue);
         userRepository.save(user);
+        
+        // Record the current TAV for historical tracking
+        portfolioAnalyticsService.recordCurrentTAV(user);
     }
 
 

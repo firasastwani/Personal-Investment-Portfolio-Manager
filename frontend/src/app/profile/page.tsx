@@ -4,6 +4,7 @@ import { useAuth } from "../AuthContext/AuthContext";
 import { useBalance } from "../context/BalanceContext";
 import { useState } from "react";
 import axios from "axios";
+import TAVChart from "@/components/TAVChart";
 
 export default function Profile() {
     const { user, loading } = useAuth();
@@ -81,47 +82,60 @@ export default function Profile() {
         <>
             <div className="flex flex-col min-h-screen bg-gray-100">
                 <TabBar />
-                <div className="flex justify-center my-8">
-                    <div className="bg-white p-6 rounded shadow-md w-96 text-center">
-                        <h2 className="text-2xl font-bold mb-4">User Profile</h2>
-                        <p className="mb-4">Hello, {user.username}</p>
-                        <p className="mb-4">Your user ID is: {user.userId}</p>
-                        <p className="mb-4">Current Balance: ${balance.toFixed(2)}</p>
-                        
-                        <div className="mt-6">
-                            <div className="mb-4">
-                                <input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="Enter amount"
-                                    className="w-full p-2 border rounded"
-                                    min="0"
-                                    step="0.01"
-                                />
-                            </div>
-                            
-                            <div className="flex gap-4 justify-center">
-                                <button
-                                    onClick={handleDeposit}
-                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                >
-                                    Deposit
-                                </button>
-                                <button
-                                    onClick={handleWithdraw}
-                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                                >
-                                    Withdraw
-                                </button>
-                            </div>
+                <div className="container mx-auto px-4 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* User Profile Section */}
+                        <div className="bg-white p-6 rounded shadow-md">
+                            <h2 className="text-2xl font-bold mb-4 text-center">User Profile</h2>
+                            <div className="space-y-4">
+                                <p className="text-lg">Hello, <span className="font-semibold">{user.username}</span></p>
+                                <p className="text-gray-600">User ID: <span className="font-mono">{user.userId}</span></p>
+                                <p className="text-lg">Current Balance: <span className="font-bold text-blue-600">${balance.toFixed(2)}</span></p>
+                                
+                                <div className="mt-6 border-t pt-4">
+                                    <h3 className="text-lg font-semibold mb-4">Account Actions</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <input
+                                                type="number"
+                                                value={amount}
+                                                onChange={(e) => setAmount(e.target.value)}
+                                                placeholder="Enter amount"
+                                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                min="0"
+                                                step="0.01"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={handleDeposit}
+                                                className="flex-1 bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                                            >
+                                                Deposit
+                                            </button>
+                                            <button
+                                                onClick={handleWithdraw}
+                                                className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition-colors font-medium"
+                                            >
+                                                Withdraw
+                                            </button>
+                                        </div>
 
-                            {error && (
-                                <p className="text-red-500 mt-2">{error}</p>
-                            )}
-                            {success && (
-                                <p className="text-green-500 mt-2">{success}</p>
-                            )}
+                                        {error && (
+                                            <p className="text-red-500 text-sm">{error}</p>
+                                        )}
+                                        {success && (
+                                            <p className="text-green-500 text-sm">{success}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* TAV Chart Section */}
+                        <div className="bg-white p-6 rounded shadow-md">
+                            <TAVChart days={7} />
                         </div>
                     </div>
                 </div>

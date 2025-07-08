@@ -33,12 +33,27 @@ public class PriceRequestKafkaListner {
             
             Map<String, String> prices = new HashMap<>();
             for (String symbol : symbols) {
-                double price = priceFetchService.fetchPrice(symbol);
-                prices.put(symbol, String.valueOf(price));
+                // Skip invalid symbols
+                if (symbol == null || symbol.trim().isEmpty() || symbol.equals("--")) {
+                    logger.warn("Skipping invalid symbol: {}", symbol);
+                    continue;
+                }
+                
+                Double price = priceFetchService.fetchPrice(symbol);
+                if (price != null && price > 0) {
+                    prices.put(symbol, String.valueOf(price));
+                    logger.info("Added price for {}: {}", symbol, price);
+                } else {
+                    logger.warn("Skipping invalid price for symbol: {}", symbol);
+                }
             }
 
-            pricePublishService.publishPrices(prices);
-            logger.info("Successfully published prices for symbols: {}", symbols);
+            if (!prices.isEmpty()) {
+                pricePublishService.publishPrices(prices);
+                logger.info("Successfully published prices for symbols: {}", prices.keySet());
+            } else {
+                logger.warn("No valid prices to publish for symbols: {}", symbols);
+            }
         } catch (Exception e) {
             logger.error("Error processing price update request: {}", e.getMessage(), e);
         }

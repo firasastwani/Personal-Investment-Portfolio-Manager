@@ -79,11 +79,13 @@ public class PriceUpdateAlgorithmService {
         List<SecurityPriority> prorities = new ArrayList<>(); 
 
         for(Security security: allSecurities){
+            // Skip invalid symbols
+            if (isValidSymbol(security.getSymbol())) {
+                double score = calculatePriorityScore(security.getSymbol());
+                String reason = generateReason(security.getSymbol());
 
-            double score = calculatePriorityScore(security.getSymbol());
-            String reason = generateReason(security.getSymbol());
-
-            prorities.add(new SecurityPriority(security.getSymbol(), score, reason));
+                prorities.add(new SecurityPriority(security.getSymbol(), score, reason));
+            }
         }
 
         // sorts those with higest priority first
@@ -142,6 +144,27 @@ public class PriceUpdateAlgorithmService {
 
 
         return "";
+   }
+   
+   /**
+    * Validates if a symbol is valid for price updates
+    */
+   private boolean isValidSymbol(String symbol) {
+       if (symbol == null || symbol.trim().isEmpty()) {
+           return false;
+       }
+       
+       // Skip invalid symbols like "--"
+       if (symbol.equals("--")) {
+           return false;
+       }
+       
+       // Skip symbols that contain only special characters
+       if (symbol.matches("^[^a-zA-Z0-9]+$")) {
+           return false;
+       }
+       
+       return true;
    } 
 
    // for debugging

@@ -64,19 +64,7 @@ export default function Dashboard() {
         }
     }, [user]);
 
-    const handleRemove = async (id: number) => {
-        try {
-            await axios.delete(`/api/portfolios/${id}`);
-            setPortfolios(prevPortfolios => 
-                prevPortfolios.filter(portfolio => portfolio.portfolioId !== id)
-            );
-        } catch (error) {
-            console.error("Error removing portfolio:", error);
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
-                await refreshUser();
-            }
-        }
-    };
+
 
     if (loading) {
         return <div>Loading...</div>;
@@ -125,12 +113,6 @@ export default function Dashboard() {
                                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                                         >
                                             View Portfolio
-                                        </button>
-                                        <button
-                                            onClick={() => handleRemove(portfolio.portfolioId)}
-                                            className="text-red-500 border border-red-300 rounded py-2 hover:text-red-600"
-                                        >
-                                            Remove Portfolio
                                         </button>
                                     </div>
                                 </div>

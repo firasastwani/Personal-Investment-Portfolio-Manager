@@ -45,7 +45,7 @@ public class PriceOrchestratorService {
         this.securityService = securityService;
     }
     
-    @Scheduled(fixedRate = 300000) // 300,000 ms = 5 min - PAUSED FOR TESTING
+    //@Scheduled(fixedRate = 300000) // 300,000 ms = 5 min - PAUSED FOR TESTING
     public void scheduledPriceUpdate(){
 
         logger.info("Running scheduled price update");
@@ -88,6 +88,11 @@ public class PriceOrchestratorService {
         logger.info("Updating specified symbols: {}", symbols);
 
         for(String symbol: symbols){
+            // Skip invalid symbols
+            if (!isValidSymbol(symbol)) {
+                logger.warn("Skipping invalid symbol: {}", symbol);
+                continue;
+            }
 
             try {
 
@@ -149,8 +154,17 @@ public class PriceOrchestratorService {
 
     public void forceRefreshPrices(List<String> symbols){
 
+        // Filter out invalid symbols
+        List<String> validSymbols = symbols.stream()
+            .filter(this::isValidSymbol)
+            .collect(java.util.stream.Collectors.toList());
+            
+        if (validSymbols.size() != symbols.size()) {
+            logger.warn("Filtered out {} invalid symbols from force refresh request", symbols.size() - validSymbols.size());
+        }
+
         // invalidate cache for inputted symbols
-        for(String symbol: symbols){
+        for(String symbol: validSymbols){
             priceCacheService.invalidatePrice(symbol);
         }
 
@@ -158,9 +172,9 @@ public class PriceOrchestratorService {
 
         if(kafkaEnabled && kafkaPriceUpdateService != null){
 
-            kafkaPriceUpdateService.requestBatchPriceUpdate(symbols);
+            kafkaPriceUpdateService.requestBatchPriceUpdate(validSymbols);
         } else if(fallBackPriceUpdateService != null) {
-            fallBackPriceUpdateService.getBatchPrices(symbols);
+            fallBackPriceUpdateService.getBatchPrices(validSymbols);
         } else {
             logger.warn("No price update service available for symbol a force refresh");
         }
@@ -189,6 +203,27 @@ public class PriceOrchestratorService {
 
         logger.info("Clearing all cached prices");
         priceCacheService.clearAllPrices();
+    }
+
+    /**
+     * Validates if a symbol is valid for price updates
+     */
+    private boolean isValidSymbol(String symbol) {
+        if (symbol == null || symbol.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Skip invalid symbols like "--"
+        if (symbol.equals("--")) {
+            return false;
+        }
+        
+        // Skip symbols that contain only special characters
+        if (symbol.matches("^[^a-zA-Z0-9]+$")) {
+            return false;
+        }
+        
+        return true;
     }
 
     // health check
