@@ -5,6 +5,7 @@ import { useAuth } from "../../AuthContext/AuthContext";
 import { useState } from "react";
 import { useEffect } from "react";
 import BuyList from "@/components/BuyList";
+import StockSearch from "@/components/StockSearch";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -24,6 +25,7 @@ interface SuccessMessage {
 export default function Buy() {
     const { user, loading, refreshUser } = useAuth();
     const [stocks, setStocks] = useState<Stock[]>([]);
+    const [filteredStocks, setFilteredStocks] = useState<Stock[]>([]);
     const [fetching, setFetching] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessages, setSuccessMessages] = useState<SuccessMessage[]>([]);
@@ -35,6 +37,7 @@ export default function Buy() {
         try {
             const response = await axios.get("/api/securities");
             setStocks(response.data);
+            setFilteredStocks(response.data);
         } catch (error) {
             console.error("Error fetching stocks:", error);
             if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -119,8 +122,14 @@ export default function Buy() {
                                 {error}
                             </div>
                         )}
-                        <BuyList 
+                        
+                        <StockSearch 
                             stocks={stocks} 
+                            onSearch={setFilteredStocks} 
+                        />
+                        
+                        <BuyList 
+                            stocks={filteredStocks} 
                             handleAction={handleBuyStock}
                             successMessages={successMessages}
                         />
