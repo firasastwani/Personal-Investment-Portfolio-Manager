@@ -19,15 +19,15 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 graph TB
     subgraph "PIPSAP Ecosystem"
         subgraph "Frontend Layer"
-            A[Next.js Frontend<br/>• React 19<br/>• TypeScript<br/>• Tailwind CSS<br/>• Chart.js]
+            A[Next.js Frontend<br/>• React 19<br/>• TypeScript<br/>• Chart.js]
         end
 
         subgraph "Backend Layer"
-            B[Spring Boot Backend<br/>• Java 17<br/>• Spring Boot<br/>• JWT Auth<br/>• MySQL]
+            B[Spring Boot Backend<br/>• Java 17<br/>• Spring Boot<br/>• JWT Auth<br/>• MySQL<br/>• Redis Cache]
         end
 
         subgraph "Microservices Layer"
-            C[Stock Price Service<br/>• gRPC Server<br/>• Kafka Client<br/>• Redis Cache<br/>• Finnhub API]
+            C[Stock Price Service<br/>• gRPC Server<br/>• Kafka Client<br/>• Finnhub API]
         end
 
         subgraph "Infrastructure Layer"
@@ -56,7 +56,7 @@ graph TB
 ### Price Update System Flow
 
 ```mermaid
-flowchart TD
+flowchart LR
     A[Scheduled Trigger<br/>Every 5 minutes] --> B[PriceUpdate Algorithm Service]
     B --> C[Priority Calculation<br/>Portfolio Weight × Holdings +<br/>Watchlist Weight × Users +<br/>Time Weight × Hours Since Update]
     C --> D[Kafka Producer<br/>Backend]
@@ -182,23 +182,23 @@ graph LR
         A[Cache Hit Rate<br/>~90%] --> B[Response Time<br/><1ms]
         B --> C[Database Load Reduction<br/>90%+]
     end
-    
+
     subgraph "Update Frequency"
         D[Scheduled Updates<br/>Every 5 minutes] --> E[Batch Size<br/>Up to 50 symbols]
         E --> F[Priority Algorithm<br/>Portfolio > Watchlist > Time]
     end
-    
+
     subgraph "Scalability"
         G[Redis<br/>Thousands of concurrent requests] --> H[Kafka<br/>High-throughput price updates]
         H --> I[Database<br/>Minimal load due to caching]
     end
-    
+
     subgraph "API Response Times"
         J[Cached Price Lookup<br/><1ms] --> K[Portfolio Analytics<br/><50ms]
         K --> L[Historical TAV<br/><100ms]
         L --> M[Real-time Updates<br/><5ms]
     end
-    
+
     style A fill:#e8f5e8
     style B fill:#e8f5e8
     style C fill:#e8f5e8
@@ -213,16 +213,16 @@ graph LR
 ### Backend Architecture
 
 - **Framework**: Spring Boot 3.2.4 with Java 17
-- **Security**: JWT-based authentication with Spring Security
-- **Database**: MySQL 8.0 with optimized indexes and prepared statements
-- **Caching**: Redis 7.0 with TTL-based cache invalidation
-- **Message Queue**: Apache Kafka 6.2.0 for asynchronous processing
-- **Microservices**: gRPC-based stock price service
-- **API**: RESTful endpoints with comprehensive error handling
+- **Security**: JWT-based authentication with Spring Security 
+- **Database**: Dockerized MySQL 8.0 instance with optimized indexes and prepared statements 
+- **Caching**: Redis 7.0 with TTL-based cache invalidation 
+- **Message Queue**: Dockerized Apache Kafka 6.2.0 for asynchronous processing 
+- **Microservices**: gRPC-based stock price service (future implementation)
+- **API**: RESTful endpoints with comprehensive error handling and rate limiting
 
 ### Frontend Architecture
 
-- **Framework**: Next.js 15.3.1 with React 19
+- **Framework**: Next.js 15.3.1 with React 19 
 - **Language**: TypeScript for type safety
 - **Styling**: Tailwind CSS 4.0 for responsive design
 - **Charts**: Chart.js with react-chartjs-2 for data visualization
@@ -232,9 +232,9 @@ graph LR
 ### Infrastructure
 
 - **Containerization**: Docker with docker-compose for local development
-- **Message Broker**: Kafka with Zookeeper for distributed coordination
-- **Cache**: Redis for high-performance data caching
-- **Database**: MySQL with connection pooling and query optimization
+- **Message Broker**: Dockerized Apache Kafka 6.2.0 with Zookeeper for distributed coordination
+- **Cache**: Dockerized Redis 7.0 for high-performance data caching
+- **Database**: Dockerized MySQL 8.0 instance with connection pooling and query optimization
 
 ## 🔐 Security Features
 
@@ -242,8 +242,8 @@ graph LR
 
 - **JWT Tokens**: Secure token-based authentication
 - **Role-Based Access**: User and admin role management
-- **Password Security**: Encrypted password storage
-- **Session Management**: Automatic token refresh
+- **Password Security**: Encrypted password storage with bcrypt
+- **Session Management**: Automatic token refresh with JWT
 
 ### Data Protection
 
@@ -259,15 +259,10 @@ graph LR
 - **Multi-Portfolio Support**: Users can create and manage multiple portfolios
 - **Real-time Valuation**: Live portfolio value updates with price changes
 - **Transaction History**: Complete buy/sell transaction tracking
-- **Performance Analytics**: Historical performance analysis and charts
+- **Performance Analytics**: Historical performance analysis and charts (TAV)
 
-### Watchlist & Alerts
 
-- **Personal Watchlists**: User-specific security monitoring
-- **Real-time Updates**: Live price updates for watched securities
-- **Portfolio Integration**: Seamless watchlist-to-portfolio transfers
-
-### Analytics & Reporting
+### Analytics & Reporting (future implementations)
 
 - **Historical TAV Tracking**: Total Account Value history over time
 - **Performance Charts**: Interactive charts for portfolio analysis
@@ -353,100 +348,6 @@ graph LR
 - Database query performance
 - API response times
 
-## 🔧 Configuration
-
-### Application Properties
-
-```yaml
-price-update:
-  cache:
-    ttl-minutes: 10
-    max-batch-size: 50
-  algorithm:
-    portfolio-weight: 0.6
-    watchlist-weight: 0.3
-    time-weight: 0.1
-    min-update-interval-minutes: 5
-  microservice:
-    grpc:
-      host: localhost
-      port: 9090
-    kafka:
-      request-topic: price-update-requests
-      response-topic: stock-price-updates
-```
-
-## 🧪 Testing
-
-### Backend Tests
-
-```bash
-./mvnw test
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm test
-```
-
-### Performance Tests
-
-```bash
-cd frontend/tests/performance
-npm run test:performance
-```
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User authentication
-- `POST /api/auth/refresh` - Token refresh
-
-### Portfolio Endpoints
-
-- `GET /api/portfolios` - Get user portfolios
-- `POST /api/portfolios` - Create new portfolio
-- `GET /api/portfolios/{id}` - Get portfolio details
-- `PUT /api/portfolios/{id}` - Update portfolio
-
-### Transaction Endpoints
-
-- `POST /api/transactions` - Create transaction
-- `GET /api/transactions` - Get transaction history
-- `GET /api/transactions/{id}` - Get transaction details
-
-### Analytics Endpoints
-
-- `GET /api/analytics/tav-history` - Get TAV history
-- `GET /api/analytics/portfolio-performance` - Portfolio performance
-- `GET /api/analytics/sector-diversification` - Sector analysis
-
-## 🤝 Contributing
-
-This project demonstrates advanced software engineering practices and is intended as a portfolio piece. While not open for general contributions, the code serves as a reference for:
-
-- Microservices architecture implementation
-- Real-time data processing systems
-- Event-driven architecture patterns
-- High-performance caching strategies
-- Full-stack development with modern technologies
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Spring Boot Team**: For the excellent framework and ecosystem
-- **Next.js Team**: For the powerful React framework
-- **Redis Team**: For the high-performance caching solution
-- **Apache Kafka**: For the distributed streaming platform
-- **Finnhub**: For providing real-time financial data APIs
-- **Open Source Community**: For the various tools and libraries used
 
 ---
 

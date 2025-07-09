@@ -77,13 +77,14 @@ The stock price service operates as a separate microservice with the following c
 - **Data Validation**: Ensures price data integrity and validity
 - **Rate Limiting**: Manages API call limits to external services
 - **Message Publishing**: Sends price updates via Kafka topics
+- **Data Processing**: Formats and validates price data before publishing
 
 #### Technology Stack
 
 - **Framework**: Spring Boot 3.2.3
 - **Communication**: gRPC for synchronous calls, Kafka for asynchronous
-- **Caching**: Redis for temporary price storage
 - **External APIs**: Finnhub for real-time market data
+- **Data Processing**: Price validation and formatting
 
 #### Service Architecture
 
@@ -98,7 +99,7 @@ graph TB
 
         subgraph "Service Layer"
             D[Price Fetch Service<br/>• Finnhub API<br/>• Rate Limiting<br/>• Error Handling]
-            E[Data Cache Service<br/>• Redis Cache<br/>• TTL Mgmt<br/>• Batch Ops]
+            E[Price Processing<br/>• Data Validation<br/>• Format Conversion<br/>• Error Handling]
             F[External API Client<br/>• HTTP Client<br/>• Retry Logic<br/>• Circuit Breaker]
         end
     end
@@ -163,7 +164,7 @@ Backend (Producer) → price-update-requests Topic → Microservice (Consumer)
 Microservice (Producer) → stock-price-updates Topic → Backend (Consumer)
 ```
 
-#### 4. Cache Update Pattern
+#### 4. Cache Update Pattern (Backend Monolith)
 
 ```java
 @KafkaListener(topics = "${price-update.microservice.kafka.response-topic}")
@@ -172,7 +173,7 @@ public void handleBatchPriceUpdate(String message) {
     String symbol = parts[0].trim();
     BigDecimal price = new BigDecimal(parts[1].trim());
 
-    // Update cache
+    // Update cache in backend monolith
     priceCacheService.cachePrice(symbol, price);
 
     // Update database
