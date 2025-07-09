@@ -56,7 +56,7 @@ graph TB
 ### Price Update System Flow
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Scheduled Trigger<br/>Every 5 minutes] --> B[PriceUpdate Algorithm Service]
     B --> C[Priority Calculation<br/>Portfolio Weight × Holdings +<br/>Watchlist Weight × Users +<br/>Time Weight × Hours Since Update]
     C --> D[Kafka Producer<br/>Backend]
@@ -213,16 +213,16 @@ graph LR
 ### Backend Architecture
 
 - **Framework**: Spring Boot 3.2.4 with Java 17
-- **Security**: JWT-based authentication with Spring Security 
-- **Database**: Dockerized MySQL 8.0 instance with optimized indexes and prepared statements 
-- **Caching**: Redis 7.0 with TTL-based cache invalidation 
-- **Message Queue**: Dockerized Apache Kafka 6.2.0 for asynchronous processing 
+- **Security**: JWT-based authentication with Spring Security
+- **Database**: Dockerized MySQL 8.0 instance with optimized indexes and prepared statements
+- **Caching**: Redis 7.0 with TTL-based cache invalidation
+- **Message Queue**: Dockerized Apache Kafka 6.2.0 for asynchronous processing
 - **Microservices**: gRPC-based stock price service (future implementation)
 - **API**: RESTful endpoints with comprehensive error handling and rate limiting
 
 ### Frontend Architecture
 
-- **Framework**: Next.js 15.3.1 with React 19 
+- **Framework**: Next.js 15.3.1 with React 19
 - **Language**: TypeScript for type safety
 - **Styling**: Tailwind CSS 4.0 for responsive design
 - **Charts**: Chart.js with react-chartjs-2 for data visualization
@@ -260,7 +260,6 @@ graph LR
 - **Real-time Valuation**: Live portfolio value updates with price changes
 - **Transaction History**: Complete buy/sell transaction tracking
 - **Performance Analytics**: Historical performance analysis and charts (TAV)
-
 
 ### Analytics & Reporting (future implementations)
 
@@ -347,8 +346,6 @@ graph LR
 - Kafka message throughput
 - Database query performance
 - API response times
-
-
 ---
 
 **PIPSAP** - Demonstrating enterprise-grade software engineering with real-world financial application complexity.
