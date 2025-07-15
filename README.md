@@ -174,39 +174,6 @@ erDiagram
 - **Time Since Update**: 10% weight (background priority)
 - **Smart Batching**: Groups symbols by urgency and update frequency
 
-### Performance Metrics
-
-```mermaid
-graph LR
-    subgraph "Cache Performance"
-        A[Cache Hit Rate<br/>~90%] --> B[Response Time<br/><1ms]
-        B --> C[Database Load Reduction<br/>90%+]
-    end
-
-    subgraph "Update Frequency"
-        D[Scheduled Updates<br/>Every 5 minutes] --> E[Batch Size<br/>Up to 50 symbols]
-        E --> F[Priority Algorithm<br/>Portfolio > Watchlist > Time]
-    end
-
-    subgraph "Scalability"
-        G[Redis<br/>Thousands of concurrent requests] --> H[Kafka<br/>High-throughput price updates]
-        H --> I[Database<br/>Minimal load due to caching]
-    end
-
-    subgraph "API Response Times"
-        J[Cached Price Lookup<br/><1ms] --> K[Portfolio Analytics<br/><50ms]
-        K --> L[Historical TAV<br/><100ms]
-        L --> M[Real-time Updates<br/><5ms]
-    end
-
-    style A fill:#e8f5e8
-    style B fill:#e8f5e8
-    style C fill:#e8f5e8
-    style J fill:#fff3e0
-    style K fill:#fff3e0
-    style L fill:#fff3e0
-    style M fill:#fff3e0
-```
 
 ## 🛠️ Technical Stack
 
