@@ -184,7 +184,7 @@ erDiagram
 - **Database**: Dockerized MySQL 8.0 instance with optimized indexes and prepared statements
 - **Caching**: Redis 7.0 with TTL-based cache invalidation
 - **Message Queue**: Dockerized Apache Kafka 6.2.0 for asynchronous processing
-- **Microservices**: gRPC-based stock price service (future implementation)
+- **Microservices**: gRPC-based stock price service (future implementation), currently posts to Kafka topic
 - **API**: RESTful endpoints with comprehensive error handling and rate limiting
 
 ### Frontend Architecture
