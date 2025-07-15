@@ -57,7 +57,9 @@ const TAVChart: React.FC<TAVChartProps> = ({ days = 7 }) => {
             'Content-Type': 'application/json'
           }
         });
-        setData(response.data);
+        // Sort data by date ascending (oldest to newest)
+        const sortedData = response.data.slice().sort((a: TAVDataPoint, b: TAVDataPoint) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        setData(sortedData);
       } catch (error) {
         console.error('Error fetching historical TAV data:', error);
         setError('Failed to load historical data');
@@ -93,6 +95,20 @@ const TAVChart: React.FC<TAVChartProps> = ({ days = 7 }) => {
     );
   }
 
+  // Calculate summary statistics
+  const currentTAV = data[data.length - 1]?.tav || 0;
+  const previousTAV = data[data.length - 2]?.tav || currentTAV;
+  const dailyChange = currentTAV - previousTAV;
+  const dailyChangePercentage = previousTAV > 0 ? (dailyChange / previousTAV) * 100 : 0;
+  
+  const totalChange = data.length > 1 ? currentTAV - data[0].tav : 0;
+  const totalChangePercentage = data[0]?.tav > 0 ? (totalChange / data[0].tav) * 100 : 0;
+
+  // Set chart color based on TAV performance
+  const isIncrease = totalChange >= 0;
+  const lineColor = isIncrease ? 'rgb(34,197,94)' : 'rgb(239,68,68)'; // green-500 or red-500
+  const fillColor = isIncrease ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+
   const chartData = {
     labels: data.map(point => {
       const date = new Date(point.date);
@@ -105,11 +121,11 @@ const TAVChart: React.FC<TAVChartProps> = ({ days = 7 }) => {
       {
         label: 'Total Account Value ($)',
         data: data.map(point => point.tav),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: lineColor,
+        backgroundColor: fillColor,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: 'rgb(59, 130, 246)',
+        pointBackgroundColor: lineColor,
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
         pointRadius: 4,
@@ -160,15 +176,6 @@ const TAVChart: React.FC<TAVChartProps> = ({ days = 7 }) => {
       mode: 'index' as const,
     },
   };
-
-  // Calculate summary statistics
-  const currentTAV = data[data.length - 1]?.tav || 0;
-  const previousTAV = data[data.length - 2]?.tav || currentTAV;
-  const dailyChange = currentTAV - previousTAV;
-  const dailyChangePercentage = previousTAV > 0 ? (dailyChange / previousTAV) * 100 : 0;
-  
-  const totalChange = data.length > 1 ? currentTAV - data[0].tav : 0;
-  const totalChangePercentage = data[0]?.tav > 0 ? (totalChange / data[0].tav) * 100 : 0;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
