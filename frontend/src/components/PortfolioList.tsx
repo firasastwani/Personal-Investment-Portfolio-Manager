@@ -15,7 +15,7 @@ interface Portfolio {
 
 interface StockListProps {
     portfolios: Portfolio[];
-    handleAction: (symbol: string) => Promise<void>;
+    handleAction: (symbol: string, quantity: number) => Promise<void>;
 }
 
 const PortfolioList: React.FC<StockListProps> = ({ portfolios, handleAction }) => {
@@ -27,9 +27,10 @@ const PortfolioList: React.FC<StockListProps> = ({ portfolios, handleAction }) =
         if (button) {
             const row = button.closest("tr");
             const symbol = row?.getAttribute('data-symbol');
+            const quantity = Number(button.getAttribute('data-quantity')) || 1;
             if (symbol) {
                 try {
-                    await handleAction(symbol);
+                    await handleAction(symbol, quantity);
                     await refreshBalances();
                 } catch (error) {
                     console.error('Error selling stock:', error);

@@ -16,7 +16,7 @@ SELECT
 FROM portfolios p
 JOIN portfolio_holdings ph ON p.portfolio_id = ph.portfolio_id
 JOIN securities s ON ph.security_id = s.security_id
-WHERE p.portfolio_id = ?
+WHERE p.portfolio_id = 30
 GROUP BY p.portfolio_id, p.name, s.sector
 ORDER BY total_value DESC;
 
