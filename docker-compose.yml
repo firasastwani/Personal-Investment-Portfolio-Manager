@@ -42,8 +42,21 @@ services:
     networks:
       - pipsap-network
 
+  mysql:
+    image: mysql:8.1.0
+    container_name: pipsap-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlpass
+      MYSQL_DATABASE: pipsap_db
+    ports:
+      - "33306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
 volumes:
   redis_data:
+  mysql_data:
 
 networks:
   pipsap-network:
