@@ -46,7 +46,7 @@ This document describes the real-time stock price update system implemented in t
   - Handles manual triggers and urgent updates
   - Provides health monitoring
 
-### 5. **gRPC Client** (`GrpcPriceUpdateService`)
+### 5. **gRPC Client** (`GrpcPriceUpdateService`) (future implementation)
 
 - **Purpose**: For urgent single-price requests
 - **Status**: Placeholder implementation (requires proto files)
@@ -54,7 +54,7 @@ This document describes the real-time stock price update system implemented in t
 
 ## How It Works
 
-### 1. **Scheduled Updates** (Every 5 minutes)
+### 1. **Scheduled Updates** (Every 10 minutes)
 
 ```
 Algorithm Service → Calculates priorities → Orchestrator → Kafka Producer → Microservice
