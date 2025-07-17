@@ -191,7 +191,6 @@ erDiagram
 
 - **Framework**: Next.js 15.3.1 with React 19
 - **Language**: TypeScript for type safety
-- **Styling**: Tailwind CSS 4.0 for responsive design
 - **Charts**: Chart.js with react-chartjs-2 for data visualization
 - **State Management**: React Context API for global state
 - **Authentication**: JWT token management with secure storage
