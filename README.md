@@ -11,6 +11,62 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 ![Redis](https://img.shields.io/badge/Redis-7.0-red)
 ![Kafka](https://img.shields.io/badge/Kafka-6.2.0-purple)
 
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Java 17 or higher
+- Node.js 18 or higher
+- Docker and Docker Compose
+
+### Quick Start
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/pipsap.git
+   cd pipsap
+   ```
+
+2. **Start Infrastructure Services**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Initialize Database**
+
+   ```bash
+   mysql -u root -p < ddl.sql
+   mysql -u root -p < data.sql
+   ```
+
+4. **Start Backend Service**
+
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+5. **Start Stock Price Microservice**
+
+   ```bash
+   cd services/stock-price-service
+   ./mvnw spring-boot:run
+   ```
+
+6. **Start Frontend Application**
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+7. **Access the Application**
+   - Frontend: http://localhost:3000
+
+
 ## 🏗️ System Architecture
 
 ### High-Level Architecture Diagram
@@ -241,60 +297,6 @@ erDiagram
 - **Cache Optimization**: Intelligent caching for performance
 - **Priority-Based Updates**: Smart update scheduling based on user activity
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Java 17 or higher
-- Node.js 18 or higher
-- Docker and Docker Compose
-- MySQL 8.0 (or use Docker)
-
-### Quick Start
-
-1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/yourusername/pipsap.git
-   cd pipsap
-   ```
-
-2. **Start Infrastructure Services**
-
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Initialize Database**
-
-   ```bash
-   mysql -u root -p < ddl.sql
-   mysql -u root -p < data.sql
-   ```
-
-4. **Start Backend Service**
-
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-5. **Start Stock Price Microservice**
-
-   ```bash
-   cd services/stock-price-service
-   ./mvnw spring-boot:run
-   ```
-
-6. **Start Frontend Application**
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-7. **Access the Application**
-   - Frontend: http://localhost:3000
 
 ## 📈 System Monitoring
 
