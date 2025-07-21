@@ -11,7 +11,6 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 ![Redis](https://img.shields.io/badge/Redis-7.0-red)
 ![Kafka](https://img.shields.io/badge/Kafka-6.2.0-purple)
 
-
 ## 🏁 Getting Started
 
 ### Prerequisites
@@ -26,7 +25,6 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 
    ```bash
    git clone https://github.com/firasastwani/Personal-Investment-Portfolio-Manager.git
-   cd pipsap
    ```
 
 2. **Start Infrastructure Services**
@@ -38,20 +36,21 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 3. **Initialize Database**
 
    ```bash
-   mysql -u root -p < pipsap_db_dump.sql
+   docker exec -it pipsap-mysql mysql -u root -pmysqlpass -e "drop database if exists pipsap_db"
+   cat pipsap_db_dump.sql | docker exec -i pipsap-mysql mysql -u root -pmysqlpass
    ```
 
 4. **Start Backend Service**
 
    ```bash
-   ./mvnw spring-boot:run
+   mvn spring-boot:run
    ```
 
 5. **Start Stock Price Microservice**
 
    ```bash
    cd services/stock-price-service
-   ./mvnw spring-boot:run
+   mvn spring-boot:run
    ```
 
 6. **Start Frontend Application**
@@ -64,7 +63,6 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 
 7. **Access the Application**
    - Frontend: http://localhost:3000
-
 
 ## 🏗️ System Architecture
 
@@ -229,7 +227,6 @@ erDiagram
 - **Time Since Update**: 10% weight (background priority)
 - **Smart Batching**: Groups symbols by urgency and update frequency
 
-
 ## 🛠️ Technical Stack
 
 ### Backend Architecture
@@ -296,7 +293,6 @@ erDiagram
 - **Cache Optimization**: Intelligent caching for performance
 - **Priority-Based Updates**: Smart update scheduling based on user activity
 
-
 ## 📈 System Monitoring
 
 ### Health Check Endpoints
@@ -311,6 +307,7 @@ erDiagram
 - Kafka message throughput
 - Database query performance
 - API response times
+
 ---
 
 **PIPSAP** - Demonstrating enterprise-grade software engineering with real-world financial application complexity.
