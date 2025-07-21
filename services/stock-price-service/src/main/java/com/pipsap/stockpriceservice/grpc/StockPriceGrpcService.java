@@ -1,3 +1,6 @@
+// TODO: for future implementation, stream price updates directly to frontend display
+
+/* 
 package com.pipsap.stockpriceservice.grpc;
 
 import com.pipsap.stockprice.proto.PriceRequest;
@@ -65,3 +68,4 @@ public class StockPriceGrpcService extends StockPriceServiceGrpc.StockPriceServi
         logger.info("Response sent successfully");
     }
 } 
+*/

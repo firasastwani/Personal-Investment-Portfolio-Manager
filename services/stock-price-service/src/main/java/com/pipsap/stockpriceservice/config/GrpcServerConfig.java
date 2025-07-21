@@ -1,3 +1,7 @@
+// TODO: for future implementation, stream price updates directly to frontend display
+
+
+/* 
 package com.pipsap.stockpriceservice.config;
 
 import org.springframework.context.annotation.Bean;
@@ -42,4 +46,6 @@ public class GrpcServerConfig {
             server.shutdown();
         }
     }
-} 
+}
+    
+*/

@@ -38,8 +38,7 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 3. **Initialize Database**
 
    ```bash
-   mysql -u root -p < ddl.sql
-   mysql -u root -p < data.sql
+   mysql -u root -p < pipsap_db_dump.sql
    ```
 
 4. **Start Backend Service**
