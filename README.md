@@ -25,7 +25,7 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/pipsap.git
+   git clone https://github.com/firasastwani/Personal-Investment-Portfolio-Manager.git
    cd pipsap
    ```
 
