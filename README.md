@@ -12,7 +12,7 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 ![Kafka](https://img.shields.io/badge/Kafka-6.2.0-purple)
 
 
-## 🚀 Getting Started
+## 🏁 Getting Started
 
 ### Prerequisites
 
