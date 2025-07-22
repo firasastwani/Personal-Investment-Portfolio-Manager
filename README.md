@@ -11,6 +11,8 @@ PIPSAP is a sophisticated, enterprise-grade personal investment portfolio manage
 ![Redis](https://img.shields.io/badge/Redis-7.0-red)
 ![Kafka](https://img.shields.io/badge/Kafka-6.2.0-purple)
 
+Project Demo Video: https://www.loom.com/share/160472ba968749faa427d50ca66f3363?sid=9fc0e14d-6f98-4a29-9282-1e0337848176
+
 ## 🏁 Getting Started
 
 ### Prerequisites
