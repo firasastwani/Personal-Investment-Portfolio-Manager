@@ -58,7 +58,8 @@ def build_views_matrix(
     # Omega matrix: uncertainty (diagonal)
     omega = np.zeros((n_views, n_views))
     for i, view in enumerate(views):
-        confidence = view['confidence']
+        # cap to prevent division by 0 that arises when its +1
+        confidence = min(view['confidence'], 0.99)
         omega[i, i] = (1 - confidence) / confidence
     
     return P, Q, omega
@@ -66,6 +67,7 @@ def build_views_matrix(
 
 # Testing
 if __name__ == "__main__":
+    
     tickers = ['AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN']
     
     views = [
