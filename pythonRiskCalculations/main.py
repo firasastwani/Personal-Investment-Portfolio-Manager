@@ -1,7 +1,5 @@
 from black_litterman import (
-    calculate_covariance_matrix,
-    calculate_market_wieghts,
-    calculate_equilibrium_returns
+    black_litterman_optimization
 )
 
 import pandas as pd
@@ -10,21 +8,21 @@ import numpy as np
 samplePortfolio = [
     'AAPL',
     'MSFT',
+    'GOOGL',
     'META',
-    'ED',
-    'EOG',
-    'TAP',
-    'GOOG'
+    'AMZN'
 ]
 
-market_weights = calculate_market_wieghts(samplePortfolio)
+tickers = ['AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN']
+    
+views = [
+    {"ticker": "AAPL",   "return": 0.99,   "confidence": 0.99},
+    {"ticker": "MSFT",   "return": 0.12,  "confidence": 0.7},
+    {"ticker": "GOOGL",  "return": 0.3,   "confidence": 0.8},
+    {"ticker": "META",   "return": 0.20,  "confidence": 0.6},
+    {"ticker": "AMZN",   "return": -0.20, "confidence": 0.99}
+]
 
 
-cov_matrix = calculate_covariance_matrix(samplePortfolio)
-
-
-eq_ret = calculate_equilibrium_returns(cov_matrix, market_weights)
-
-print(eq_ret)
-
+black_litterman_optimization(samplePortfolio, views)
 

@@ -14,6 +14,8 @@ from typing import List, Optional, Dict, Any, Tuple
 from sklearn.covariance import LedoitWolf
 
 from get_stock_data import get_returns_for_covariance
+from views_builder import build_views_matrix
+from optimizer import optimize_portfolio
 
 
 start_date = "2023-01-01"
@@ -62,7 +64,7 @@ def calculate_covariance_matrix(
 """
     Equal weightings for now, can adjust to Market cap seperation in the future
 """
-def calculate_market_wieghts(tickers):
+def calculate_market_weights(tickers):
 
     n = len(tickers)
     return np.ones(n)/n
@@ -98,7 +100,6 @@ def calculate_equilibrium_returns(
 
 
     return equilibrium_returns
-
 
 
 
@@ -171,7 +172,6 @@ def calculate_black_litterman(
 
 
 
-
 """
 Complete end to end Black-Litterman portfolio optimization
 
@@ -200,7 +200,7 @@ def black_litterman_optimization(
 
     #Step 2, get market weights (currently just even)
     print('\nCalculating market weights')
-    market_weights = calculate_market_wieghts(tickers)
+    market_weights = calculate_market_weights(tickers)
 
     #Step 3, calculate equilibrium returns
     print('\n Calculating equilbirum returns...')
@@ -210,6 +210,69 @@ def black_litterman_optimization(
     #Step 4, build views matricies (P, Q, Ω)
     print('\n Processing investor views')
 
+    P, Q, omega = build_views_matrix(views, tickers)
+
+    print(f"  Views matrix P: {P.shape}")
+    print(f"  Expected returns Q: {Q.shape}")
+    print(f"  Uncertainty Ω: {omega.shape}")
+
+    #Step 5, calculate Black-Litterman posterior
+    print('\n Calculating Black-Litterman posterior')
+    mu_bl, sigma_bl = calculate_black_litterman(
+        pi=np.asarray(pi.values if isinstance(pi, pd.Series) else pi),
+        cov_matrix=np.asarray(cov_matrix.values if isinstance(cov_matrix, pd.DataFrame) else cov_matrix),
+        P=P,
+        Q=Q, 
+        omega=omega,
+        tau=tau
+    ) 
+
+    print('\n Optimizing portfolio weights')
+    
+    optimal_weights = optimize_portfolio(
+        expected_returns=mu_bl,
+        cov_matrix=sigma_bl,
+        tickers=tickers
+    )
+
+    # Calculate portfolio metrics
+    portfolio_return = optimal_weights @ mu_bl
+    portfolio_variance = optimal_weights @ sigma_bl @ optimal_weights
+    portfolio_volatility = np.sqrt(portfolio_variance)
+    sharpe_ratio = portfolio_return / portfolio_volatility if portfolio_volatility > 0 else 0
+    
+    # Annualize metrics (assuming daily returns)
+    annual_return = portfolio_return * 252
+    annual_volatility = portfolio_volatility * np.sqrt(252)
+    annual_sharpe = annual_return / annual_volatility if annual_volatility > 0 else 0
+        
+
+    print("\n" + "=" * 70)
+    print("OPTIMIZATION RESULTS")
+    print("=" * 70)
+    print(f"\nPortfolio Metrics (Annualized):")
+    print(f"  Expected Return:  {annual_return:.2%}")
+    print(f"  Volatility:       {annual_volatility:.2%}")
+    print(f"  Sharpe Ratio:     {annual_sharpe:.4f}")
+    
+    print(f"\nOptimal Weights:")
+    for ticker, weight in zip(tickers, optimal_weights):
+        print(f"  {ticker:6s}: {weight:7.2%}")
+    
+    print("=" * 70)
+    
+    return {
+        'tickers': tickers,
+        'optimal_weights': pd.Series(optimal_weights, index=tickers),
+        'expected_return': annual_return,
+        'volatility': annual_volatility,
+        'sharpe_ratio': annual_sharpe,
+        'mu_bl': pd.Series(mu_bl, index=tickers),
+        'sigma_bl': pd.DataFrame(sigma_bl, index=tickers, columns=tickers),
+        'equilibrium_returns': pi,
+        'cov_matrix': cov_matrix,
+        'market_weights': pd.Series(market_weights, index=tickers)
+    }
 
 
 

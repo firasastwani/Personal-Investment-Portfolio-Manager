@@ -12,7 +12,6 @@ from typing import List, Dict, Any, Tuple
 
 
 
-
 """
 Build P, Q, Ω matricies from investor views
 
