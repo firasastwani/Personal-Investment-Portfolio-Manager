@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import axios from "axios";
 import SectorDiversification from "@/components/SectorDiversification";
+import BlackLittermanOptimizer from "@/components/BlackLittermanOptimizer";
 import React from "react";
 
 interface Stock {
@@ -38,6 +39,7 @@ export default function PortfolioPage() {
     const [sectorError, setSectorError] = useState<string | null>(null);
     const [showSectorModal, setShowSectorModal] = useState(false);
     const [showTransactionModal, setShowTransactionModal] = useState(false);
+    const [showOptimizer, setShowOptimizer] = useState(false);
     const [transactions, setTransactions] = useState<any[]>([]);
     const [transactionsLoading, setTransactionsLoading] = useState(false);
     const [transactionsError, setTransactionsError] = useState<string | null>(null);
@@ -213,6 +215,16 @@ export default function PortfolioPage() {
                         <h3 className="text-xl mb-4">Total Value: ${totalValue.toFixed(2)}</h3>
                         <div className="flex space-x-2">
                             <button
+                                onClick={() => setShowOptimizer(true)}
+                                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                                disabled={stocks.length === 0}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Optimize Portfolio
+                            </button>
+                            <button
                                 onClick={() => setShowSectorModal(true)}
                                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
                             >
@@ -335,6 +347,14 @@ export default function PortfolioPage() {
                                 )}
                             </div>
                         </div>
+                    )}
+                    {/* Black-Litterman Optimizer Modal */}
+                    {showOptimizer && (
+                        <BlackLittermanOptimizer
+                            portfolioId={id}
+                            stocks={stocks}
+                            onClose={() => setShowOptimizer(false)}
+                        />
                     )}
                 </div>
             </div>
